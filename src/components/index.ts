@@ -16,3 +16,6 @@ export { Banner } from "./Banner";
 export type { BannerProps } from "./Banner";
 
 export { ReportForm } from "./ReportForm";
+
+export { Icon } from "./Icon";
+export type { IconName } from "./Icon";

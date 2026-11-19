@@ -14,10 +14,14 @@ export const colors = {
   inkSoft: "#4A5A4F",
   // primary buttons and headers
   forest: "#14452B",
+  forestSoft: "#A9BFAE",
+  forestLine: "#2D5F44",
   // income: money coming in (green)
   income: "#1E7B4F",
+  incomeOnDark: "#8FD5A6",
   // expense: money going out (red)
   expense: "#B23A2A",
+  expenseOnDark: "#F2A08F",
   // accent: focus rings and small highlights
   gold: "#D9A33B",
   // ruled lines and borders

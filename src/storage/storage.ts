@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   resetCodes: "pft:resetCodes",
   reports: "pft:reports",
   session: "pft:session",
+  hideBalance: "pft:hideBalance",
 } as const;
 
 /**
