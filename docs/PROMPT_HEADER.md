@@ -5,3 +5,5 @@ Before writing anything, read README.md: it is the full description of the app. 
 FIXED FACTS: Expo SDK 58, Expo Router, TypeScript. Screens live in src/app, all other code in src/. No backend. Do NOT install packages and do NOT edit package.json, app.json or .npmrc. Import with the "@/" alias (for example "@/theme"). No hard-coded colors, no `any`. Every word the user reads goes in src/strings/en.ts. Create or change only the files I list.
 
 WHEN YOU FINISH: list every file you created or changed, explain each in 2 to 3 simple sentences, and list anything you were unsure about.
+
+Never run `npx expo lint` or any command that installs or changes packages. If a command wants to install something, stop and tell me instead.
