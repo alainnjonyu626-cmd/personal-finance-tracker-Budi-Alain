@@ -84,6 +84,19 @@ export const strings = {
     passwordUpdated: "Password updated. Please log in with your new password.",
   },
 
+  reports: {
+    balanceLabel: "Current balance",
+    incomeLabel: "Total income",
+    expensesLabel: "Total expenses",
+    listTitle: "All reports",
+    emptyTitle: "No reports yet",
+    emptyHint: "Tap Add report to record your first income or expense.",
+    addButton: "Add report",
+    incomeType: "Income",
+    expenseType: "Expense",
+    editHint: "Opens this report for editing",
+  },
+
   // titles and words used on the screens (the real content comes later)
   screens: {
     appName: "Personal Finance Tracker",

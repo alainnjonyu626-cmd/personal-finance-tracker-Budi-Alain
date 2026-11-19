@@ -404,5 +404,33 @@ TASK: build the real Forgot Password and Recover (Reset) Password screens. Copy 
 
 Create or change only src/strings/en.ts, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx and src/app/(auth)/login.tsx.
 ```
-**What it changed:** (fill in after the model finishes)
-**Problems / fixes:** (fill in after checks)
+**What it changed:** Added forgot and reset strings to src/strings/en.ts, built the real Forgot Password screen (shows a gold reset code card) and Recover Password screen, and added a "Password updated" banner to the Login screen.
+**Problems / fixes:** Copilot asked permission before reading src/storage/auth.ts (Default Permissions mode); I allowed it once. It ran no terminal commands and did not run type checks, so I ran them myself. (Write what you saw in the checks and the browser test.)
+
+
+## Prompt 6A: Dashboard (Previous Reports)
+**Date:** 19 Nov 2026
+**Tool / model:** GitHub Copilot (Copilot Fusion)
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/theme/index.ts, src/components/index.ts, src/components/Button.tsx, src/context/AuthContext.tsx, src/storage/reports.ts, src/utils/balance.ts, src/utils/money.ts, src/utils/dates.ts, src/types/models.ts, src/app/(app)/reports.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
+
+TASK: build the real Dashboard (Previous Reports) screen. Use components from "@/components", getUserReports from "@/storage/reports", calculateTotals from "@/utils/balance", formatMoney and signedAmount from "@/utils/money", formatDisplayDate from "@/utils/dates", useAuth from "@/context/AuthContext". All words come from src/strings/en.ts and all styling from the theme.
+
+1. In src/strings/en.ts add a new group `reports` (keep every existing group and key): balanceLabel: "Current balance", incomeLabel: "Total income", expensesLabel: "Total expenses", listTitle: "All reports", emptyTitle: "No reports yet", emptyHint: "Tap Add report to record your first income or expense.", addButton: "Add report", incomeType: "Income", expenseType: "Expense", editHint: "Opens this report for editing".
+
+2. Replace src/app/(app)/reports.tsx (default export):
+   - const { user, signOut } = useAuth(). If there is no user, return null.
+   - Keep `reports: Report[]` and `loading` (true at first) in state. Load with getUserReports(user.id) inside useFocusEffect from "expo-router" (wrapped in useCallback), so the list refreshes every time the screen gets focus, for example when coming back from Add or Edit. Ignore a result that arrives after the screen lost focus.
+   - Compute the totals with calculateTotals (useMemo).
+   - Screen: a View with flex 1 and colors.paper. Use a FlatList (data reports, keyExtractor by id) with contentContainerStyle padding spacing.xl and paddingBottom of spacing.huge * 3, so the last row is never hidden behind the fixed button.
+   - ListHeaderComponent: (a) a greeting `${strings.screens.hello}, ${user.name}` in typography.title and colors.ink (numberOfLines 1), then below it a View with width 120 holding a secondary Button strings.screens.logout that calls signOut (do not navigate by hand: the guard redirects). (b) A balance card: backgroundColor colors.paperDeep, 1px colors.line border, radius.lg, padding spacing.xl, marginTop spacing.lg. Inside: the label strings.reports.balanceLabel (typography.label, colors.inkSoft); the balance formatMoney(totals.balance) in typography.displayXL, colors.ink (colors.expense when the balance is below 0), numberOfLines 1 and adjustsFontSizeToFit; a 3px colors.gold rule spacing.huge * 2 wide; then a row of two equal cells separated by a 1px colors.line divider: cell one has the label strings.reports.incomeLabel and the value `▲ ${formatMoney(totals.totalIncome)}` in typography.amount and colors.income; cell two has strings.reports.expensesLabel and `▼ ${formatMoney(totals.totalExpenses)}` in typography.amount and colors.expense. (c) A label strings.reports.listTitle (typography.label, colors.inkSoft) with marginTop spacing.xl and marginBottom spacing.sm.
+   - ListEmptyComponent: while loading show strings.common.loading; otherwise a centered block with strings.reports.emptyTitle (typography.title, colors.ink) and strings.reports.emptyHint (typography.body, colors.inkSoft).
+   - Each row is a Pressable: minHeight 64, flexDirection row, space-between, vertically centered, paddingVertical spacing.md, a 1px colors.line bottom border (a ruled line like an exercise book, no card), pressed background colors.paperDeep. Left side (flex 1): the report name in typography.bodyStrong and colors.ink (numberOfLines 1), and under it `${formatDisplayDate(date)} · ${type label}` in typography.caption and colors.inkSoft, where the type label is strings.reports.incomeType or strings.reports.expenseType. Right side: `${arrow} ${signedAmount(type, amount)}` where the arrow is ▲ for income and ▼ for expense, in typography.amount, colors.income for income and colors.expense for expense. On press: router.push({ pathname: "/edit-report/[id]", params: { id: item.id } }) (router from "expo-router"). Accessibility: accessibilityRole="button", accessibilityLabel `${name}, ${type label}, ${formatMoney(amount)}, ${formatDisplayDate(date)}`, accessibilityHint strings.reports.editHint. Add the same gold keyboard focus ring technique used in src/components/Button.tsx (it must not change the row size).
+   - A fixed bottom bar: a View with position absolute, bottom 0, left 0, right 0, padding spacing.xl, backgroundColor colors.paper and a 1px colors.line top border, holding a primary Button strings.reports.addButton that calls router.push("/add-report").
+
+Create or change only src/strings/en.ts and src/app/(app)/reports.tsx.
+```
+**What it changed:** Added the `reports` strings group to src/strings/en.ts and replaced the placeholder reports screen with the real dashboard: balance card (balance, total income, total expenses), a newest-first list with ruled rows, ▲ green income and ▼ red expense, an empty state, a fixed Add report button and a Log out button.
+**Problems / fixes:** Copilot ran no terminal commands. The list refreshes on focus. Only the empty state and navigation can be tested until Add Report exists. (Write what you saw.)
