@@ -97,6 +97,22 @@ export const strings = {
     editHint: "Opens this report for editing",
   },
 
+  form: {
+    nameLabel: "Name",
+    namePlaceholder: "e.g. Salary, Market shopping, Taxi fare",
+    typeLabel: "Type",
+    amountLabel: "Amount (FCFA)",
+    amountPlaceholder: "e.g. 18500",
+    dateLabel: "Date",
+    dateHelper: "Format: YYYY-MM-DD",
+    useToday: "Use today",
+    saveReport: "Save",
+    saving: "Saving…",
+    notFoundTitle: "Report not found",
+    notFoundHint: "This report may have been deleted.",
+    backToReports: "Back to reports",
+  },
+
   // titles and words used on the screens (the real content comes later)
   screens: {
     appName: "Personal Finance Tracker",

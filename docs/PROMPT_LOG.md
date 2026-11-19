@@ -434,3 +434,24 @@ Create or change only src/strings/en.ts and src/app/(app)/reports.tsx.
 ```
 **What it changed:** Added the `reports` strings group to src/strings/en.ts and replaced the placeholder reports screen with the real dashboard: balance card (balance, total income, total expenses), a newest-first list with ruled rows, ▲ green income and ▼ red expense, an empty state, a fixed Add report button and a Log out button.
 **Problems / fixes:** Copilot ran no terminal commands. The list refreshes on focus. Only the empty state and navigation can be tested until Add Report exists. (Write what you saw.)
+
+
+
+## Prompt 6B-fix: TypeScript errors in the Edit Report screen
+**Date:** 19 Nov 2026
+**Tool / model:** GitHub Copilot (Copilot Fusion)
+**Attached files:** docs/PROMPT_HEADER.md, src/app/(app)/edit-report/[id].tsx, src/storage/reports.ts, src/context/AuthContext.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
+
+TASK: fix exactly two TypeScript errors in src/app/(app)/edit-report/[id].tsx and change nothing else.
+
+The errors are on line 34, in `getReport(user.id, id)`:
+1. TS18047: 'user' is possibly 'null'.
+2. TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string' (the `id` argument).
+
+Fix: inside the useEffect, before calling getReport, add a guard: if `user` or `id` is missing, set the report to null, set loading to false and return. After that guard, copy user.id into a const called `userId` and the id into a const called `reportId`, and use those two consts inside the async function. Make sure `user` is in the effect's dependency array. No type casts, no `!`, no `any`. Keep all other behaviour exactly the same and change only the lines needed in that one file.
+```
+**What it changed:** Added the `form` strings group to src/strings/en.ts, created the shared ReportForm component (name, Income/Expense selector, amount, date with a Use today button, validation) and replaced the placeholder Add Report and Edit Report screens with real ones.
+**Problems / fixes:** Copilot ran no terminal commands and did not run type checks. My own `npx tsc --noEmit` found two errors in the Edit screen (`user` possibly null and `id` possibly undefined), which I fixed. Tested: bad input, the five example transactions give exactly 102,300 FCFA, edit and cancel, reload keeps the data, and a second account sees an empty list.
