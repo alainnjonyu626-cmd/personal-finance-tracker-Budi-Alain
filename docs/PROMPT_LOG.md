@@ -127,3 +127,29 @@ TASK: validation helpers and error messages. No screens.
 Create or change only src/strings/en.ts and src/utils/validation.ts.)
 **What it changed:** Added the `errors` group to src/strings/en.ts and created src/utils/validation.ts (name, email, password, confirm password, report name, type, amount and date validators).
 **Problems / fixes:** None. The model tested every required example in Node and `tsc` is clean. Decisions: minimum password length 6 (the brief gives none); emails are normalized by the accounts service before saving; amounts that become Infinity are rejected.
+
+## Prompt 2C: Balance calculation helpers and visual test
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts, src/utils/money.ts, src/app/index.tsx
+**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: balance helpers and a temporary visual test.
+
+1. Create src/utils/balance.ts exporting:
+   - calculateTotals(reports: Report[]): { totalIncome: number; totalExpenses: number; balance: number }. balance = totalIncome minus totalExpenses. Round each result to 2 decimals (Math.round(value * 100) / 100) to avoid floating point errors.
+   - sortNewestFirst(reports: Report[]): Report[]. Returns a NEW array (never change the original), sorted by date descending, and when two dates are equal by createdAt descending. YYYY-MM-DD strings can be compared as text.
+   - filterByUser(reports: Report[], userId: string): Report[]. Only the reports whose userId matches.
+   Use the Report type from "@/types/models".
+
+2. In src/app/index.tsx, ADD a clearly commented temporary section at the bottom of the design-check screen titled "Balance test (temporary)". It hard-codes these five reports (fake userId "test", fake ids, createdAt in increasing order) ONLY for this test:
+   2026-11-01 Monthly salary income 150000
+   2026-11-03 House rent expense 60000
+   2026-11-07 Market shopping expense 18500
+   2026-11-12 Freelance design job income 40000
+   2026-11-15 Electricity bill expense 9200
+   Compute calculateTotals on them and display: the balance with formatMoney, the total income, the total expenses, and one line "Expected: 102,300 FCFA" followed by "✅" if the balance is exactly 102300, otherwise "❌". Also display the names in newest-first order using sortNewestFirst (the first one shown must be "Electricity bill"). Use the theme for all styles. Plain text inside this temporary section is allowed. Do not change the rest of the screen.
+
+Create or change only src/utils/balance.ts and src/app/index.tsx.)
+**What it changed:** Created src/utils/balance.ts (calculateTotals, sortNewestFirst, filterByUser) and added a temporary balance test card to src/app/index.tsx using the five example transactions from the brief.
+**Problems / fixes:** The model's written summary said expenses were 77,700 in one place and 87,700 in another. I checked the arithmetic (60,000 + 18,500 + 9,200 = 87,700) and the browser: the balance is exactly 102,300 FCFA. Lesson: verify the screen, not only the AI's description.
