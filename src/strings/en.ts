@@ -106,6 +106,8 @@ export const strings = {
   },
 
   form: {
+    addSubtitle: "Record money coming in or going out.",
+    editSubtitle: "Update the details of this report.",
     nameLabel: "Name",
     namePlaceholder: "e.g. Salary, Market shopping, Taxi fare",
     typeLabel: "Type",
@@ -114,6 +116,8 @@ export const strings = {
     dateLabel: "Date",
     dateHelper: "Format: YYYY-MM-DD",
     useToday: "Use today",
+    today: "Today",
+    yesterday: "Yesterday",
     saveReport: "Save",
     saving: "Saving…",
     notFoundTitle: "Report not found",

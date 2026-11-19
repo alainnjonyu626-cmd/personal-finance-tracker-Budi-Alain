@@ -1,46 +1,63 @@
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
 
-import { ReportForm } from "@/components";
+import { Icon, ReportForm } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { addReport } from "@/storage/reports";
 import { strings } from "@/strings/en";
-import { colors, layout, radius, spacing, typography } from "@/theme";
+import { colors, radius, spacing, typography } from "@/theme";
 import { todayISO } from "@/utils/dates";
 
 export default function AddReportScreen() {
   const { user } = useAuth();
   const router = useRouter();
+  const [backFocused, setBackFocused] = useState(false);
 
   if (!user) {
     return null;
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
+    <View style={styles.screen}>
       <View style={styles.header}>
-        <Text style={styles.title}>{strings.screens.addReport}</Text>
-        <View style={styles.rule} />
+        <Pressable
+          onPress={() => router.replace("/reports")}
+          onFocus={() => setBackFocused(true)}
+          onBlur={() => setBackFocused(false)}
+          focusable
+          accessibilityRole="button"
+          accessibilityLabel={strings.form.backToReports}
+          style={[
+            styles.backButton,
+            backFocused && styles.focused,
+            Platform.OS === "web" && backFocused && styles.focusedWeb,
+          ]}
+        >
+          <Icon name="back" size={22} color={colors.forest} />
+        </Pressable>
+        <View style={styles.heading}>
+          <Text style={styles.title}>{strings.screens.addReport}</Text>
+          <Text style={styles.subtitle}>{strings.form.addSubtitle}</Text>
+        </View>
       </View>
 
-      <ReportForm
-        initial={{ name: "", type: "", amount: "", date: todayISO() }}
-        submitTitle={strings.form.saveReport}
-        onSubmit={async (input) => {
-          const result = await addReport(user.id, input);
-          if (result.ok) {
-            router.replace("/reports");
-            return null;
-          }
-          return result.error;
-        }}
-        onCancel={() => router.replace("/reports")}
-      />
-    </ScrollView>
+      <View style={styles.body}>
+        <ReportForm
+          initial={{ name: "", type: "", amount: "", date: todayISO() }}
+          submitTitle={strings.form.saveReport}
+          onSubmit={async (input) => {
+            const result = await addReport(user.id, input);
+            if (result.ok) {
+              router.replace("/reports");
+              return null;
+            }
+            return result.error;
+          }}
+          onCancel={() => router.replace("/reports")}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -49,26 +66,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.paper,
   },
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.lg,
-    width: "100%",
-    maxWidth: layout.maxContentWidth,
-    alignSelf: "center",
-  },
   header: {
-    gap: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+  },
+  backButton: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.pill,
+    backgroundColor: colors.paperDeep,
+    borderWidth: 1,
+    borderColor: colors.line,
+    outlineWidth: 2,
+    outlineStyle: "solid",
+    outlineColor: "transparent",
+    outlineOffset: 2,
+  },
+  heading: {
+    flex: 1,
   },
   title: {
     ...typography.displayL,
     color: colors.ink,
   },
-  rule: {
-    height: 3,
-    width: spacing.huge,
-    backgroundColor: colors.gold,
-    borderRadius: radius.sm,
+  subtitle: {
+    ...typography.caption,
+    color: colors.inkSoft,
+  },
+  body: {
+    flex: 1,
+  },
+  focused: {
+    outlineColor: colors.gold,
+    outlineWidth: 2,
+    outlineOffset: 2,
+  },
+  focusedWeb: {
+    outlineStyle: "solid",
   },
 });

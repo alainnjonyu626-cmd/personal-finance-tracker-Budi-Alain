@@ -1,17 +1,20 @@
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 
+import { Icon } from "@/components/Icon";
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
 import type { ReportInput } from "@/storage/reports";
 import type { TransactionType } from "@/types/models";
-import { todayISO } from "@/utils/dates";
+import { toISODate, todayISO } from "@/utils/dates";
 import {
   parseAmount,
   validateAmount,
@@ -80,6 +83,23 @@ function TypeOption({
         Platform.OS === "web" && focused && styles.focusedWeb,
       ]}
     >
+      <View
+        style={[
+          styles.typeBadge,
+          selected && value === "income" && styles.incomeBadgeSelected,
+          selected && value === "expense" && styles.expenseBadgeSelected,
+        ]}
+      >
+        <Icon
+          name={value}
+          size={18}
+          color={
+            selected
+              ? colors.paper
+              : colors.inkSoft
+          }
+        />
+      </View>
       <Text
         style={[
           styles.typeOptionText,
@@ -90,6 +110,15 @@ function TypeOption({
       >
         {label}
       </Text>
+      {selected ? (
+        <View style={styles.typeCheck}>
+          <Icon
+            name="check"
+            size={16}
+            color={value === "income" ? colors.income : colors.expense}
+          />
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -101,13 +130,13 @@ function TypeSelector({ value, error, onChange }: TypeSelectorProps) {
       <View style={styles.typeOptions} accessibilityRole="radiogroup">
         <TypeOption
           value="income"
-          label={`▲ ${strings.reports.incomeType}`}
+          label={strings.reports.incomeType}
           selected={value === "income"}
           onPress={onChange}
         />
         <TypeOption
           value="expense"
-          label={`▼ ${strings.reports.expenseType}`}
+          label={strings.reports.expenseType}
           selected={value === "expense"}
           onPress={onChange}
         />
@@ -118,6 +147,40 @@ function TypeSelector({ value, error, onChange }: TypeSelectorProps) {
         </Text>
       ) : null}
     </View>
+  );
+}
+
+function DateChip({
+  label,
+  selected,
+  onPress,
+}: {
+  label: string;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      focusable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ selected }}
+      style={[
+        styles.dateChip,
+        selected && styles.dateChipSelected,
+        focused && styles.focused,
+        Platform.OS === "web" && focused && styles.focusedWeb,
+      ]}
+    >
+      <Text style={[styles.dateChipText, selected && styles.dateChipTextSelected]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -181,85 +244,150 @@ export function ReportForm({
     setBannerMessage(message);
   }
 
+  const today = todayISO();
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterday = toISODate(yesterdayDate);
+
   return (
-    <View style={styles.form}>
-      <TextField
-        label={strings.form.nameLabel}
-        placeholder={strings.form.namePlaceholder}
-        value={name}
-        onChangeText={(text) => {
-          setName(text);
-          clearFieldError("name");
-        }}
-        error={errors.name}
-        autoCapitalize="sentences"
-        returnKeyType="next"
-      />
+    <KeyboardAvoidingView
+      style={styles.form}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Banner message={bannerMessage} />
 
-      <TypeSelector
-        value={type}
-        error={errors.type}
-        onChange={(nextType) => {
-          setType(nextType);
-          clearFieldError("type");
-        }}
-      />
+        <TypeSelector
+          value={type}
+          error={errors.type}
+          onChange={(nextType) => {
+            setType(nextType);
+            clearFieldError("type");
+          }}
+        />
 
-      <TextField
-        label={strings.form.amountLabel}
-        placeholder={strings.form.amountPlaceholder}
-        value={amount}
-        onChangeText={(text) => {
-          setAmount(text);
-          clearFieldError("amount");
-        }}
-        error={errors.amount}
-        keyboardType="decimal-pad"
-        returnKeyType="next"
-      />
+        <TextField
+          label={strings.form.amountLabel}
+          placeholder={strings.form.amountPlaceholder}
+          value={amount}
+          onChangeText={(text) => {
+            setAmount(text);
+            clearFieldError("amount");
+          }}
+          error={errors.amount}
+          keyboardType="decimal-pad"
+          returnKeyType="next"
+          size="large"
+          leftElement={<Text style={styles.currency}>{strings.common.currency}</Text>}
+        />
 
-      <TextField
-        label={strings.form.dateLabel}
-        value={date}
-        onChangeText={(text) => {
-          setDate(text);
-          clearFieldError("date");
-        }}
-        error={errors.date}
-        helper={strings.form.dateHelper}
-        autoCapitalize="none"
-        returnKeyType="done"
-        onSubmitEditing={handleSubmit}
-      />
-      <Button
-        title={strings.form.useToday}
-        variant="secondary"
-        onPress={() => {
-          setDate(todayISO());
-          clearFieldError("date");
-        }}
-      />
+        <TextField
+          label={strings.form.nameLabel}
+          placeholder={strings.form.namePlaceholder}
+          value={name}
+          onChangeText={(text) => {
+            setName(text);
+            clearFieldError("name");
+          }}
+          error={errors.name}
+          autoCapitalize="sentences"
+          returnKeyType="next"
+          leftElement={<Icon name="wallet" size={20} color={colors.inkSoft} />}
+        />
 
-      <Banner message={bannerMessage} />
+        <View style={styles.dateFields}>
+          <TextField
+            label={strings.form.dateLabel}
+            value={date}
+            onChangeText={(text) => {
+              setDate(text);
+              clearFieldError("date");
+            }}
+            error={errors.date}
+            helper={strings.form.dateHelper}
+            autoCapitalize="none"
+            returnKeyType="done"
+            onSubmitEditing={handleSubmit}
+            leftElement={<Icon name="calendar" size={20} color={colors.inkSoft} />}
+          />
+          <View style={styles.dateChips}>
+            <DateChip
+              label={strings.form.today}
+              selected={date === today}
+              onPress={() => {
+                setDate(today);
+                clearFieldError("date");
+              }}
+            />
+            <DateChip
+              label={strings.form.yesterday}
+              selected={date === yesterday}
+              onPress={() => {
+                setDate(yesterday);
+                clearFieldError("date");
+              }}
+            />
+          </View>
+        </View>
+      </ScrollView>
 
-      <Button
-        title={saving ? strings.form.saving : submitTitle}
-        onPress={handleSubmit}
-        loading={saving}
-      />
-      <Button
-        title={strings.common.cancel}
-        variant="secondary"
-        onPress={onCancel}
-        disabled={saving}
-      />
-    </View>
+      <View style={styles.footer}>
+        <View style={styles.cancelButton}>
+          <Button
+            title={strings.common.cancel}
+            variant="secondary"
+            onPress={onCancel}
+            disabled={saving}
+          />
+        </View>
+        <View style={styles.submitButton}>
+          <Button
+            title={saving ? strings.form.saving : submitTitle}
+            onPress={handleSubmit}
+            loading={saving}
+          />
+        </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   form: {
-    gap: spacing.lg,
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+    gap: spacing.xl,
+  },
+  footer: {
+    flexDirection: "row",
+    gap: spacing.md,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+    backgroundColor: colors.paper,
+    borderTopWidth: 1,
+    borderTopColor: colors.line,
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  submitButton: {
+    flex: 2,
+  },
+  currency: {
+    ...typography.bodyStrong,
+    color: colors.inkSoft,
   },
   typeField: {
     gap: spacing.xs,
@@ -274,11 +402,14 @@ const styles = StyleSheet.create({
   },
   typeOption: {
     flex: 1,
-    minHeight: layout.minTouchTarget,
+    minHeight: 84,
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
+    borderWidth: 2,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    position: "relative",
     outlineWidth: 2,
     outlineStyle: "solid",
     outlineColor: "transparent",
@@ -286,21 +417,33 @@ const styles = StyleSheet.create({
   },
   incomeSelected: {
     backgroundColor: colors.incomeTint,
-    borderWidth: 2,
     borderColor: colors.income,
   },
   expenseSelected: {
     backgroundColor: colors.expenseTint,
-    borderWidth: 2,
     borderColor: colors.expense,
   },
   typeOptionUnselected: {
     backgroundColor: colors.paperDeep,
-    borderWidth: 1,
     borderColor: colors.line,
+  },
+  typeBadge: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: radius.pill,
+    backgroundColor: colors.paper,
+  },
+  incomeBadgeSelected: {
+    backgroundColor: colors.income,
+  },
+  expenseBadgeSelected: {
+    backgroundColor: colors.expense,
   },
   typeOptionText: {
     ...typography.bodyStrong,
+    flexShrink: 1,
   },
   incomeSelectedText: {
     color: colors.income,
@@ -310,6 +453,42 @@ const styles = StyleSheet.create({
   },
   typeOptionUnselectedText: {
     color: colors.ink,
+  },
+  typeCheck: {
+    position: "absolute",
+    top: spacing.xs,
+    right: spacing.xs,
+  },
+  dateFields: {
+    gap: spacing.md,
+  },
+  dateChips: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  dateChip: {
+    minHeight: layout.minTouchTarget,
+    justifyContent: "center",
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.paperDeep,
+    outlineWidth: 2,
+    outlineStyle: "solid",
+    outlineColor: "transparent",
+    outlineOffset: 2,
+  },
+  dateChipSelected: {
+    backgroundColor: colors.forest,
+    borderColor: colors.forest,
+  },
+  dateChipText: {
+    ...typography.bodyStrong,
+    color: colors.ink,
+  },
+  dateChipTextSelected: {
+    color: colors.paper,
   },
   focused: {
     outlineColor: colors.gold,
