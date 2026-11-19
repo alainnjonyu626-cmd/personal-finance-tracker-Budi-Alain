@@ -335,5 +335,5 @@ RULES: no `any`, no type casts to silence errors. If TypeScript complains that a
 
 Create or change only the files named above.
 ```
-**What it changed:** (fill in after the model finishes)
-**Problems / fixes:** (fill in after checks)
+**What it changed:** Created src/context/AuthContext.tsx (AuthProvider, useAuth, signIn, signOut), src/app/index.tsx (redirects), the (auth) and (app) route group layouts that guard the screens, and placeholder screens for login, register, forgot-password, reset-password, reports, add-report and edit-report/[id]. Added the `screens` strings group and wrapped the layout in AuthProvider. The old design-check screen was moved to src/app/dev-check.tsx.
+**Problems / fixes:** The route types were out of date, so TypeScript rejected every route; the model regenerated them with Expo's own generator (a git-ignored file). The model also ran `npx expo lint` against the header rule. It reported creating and deleting eslint.config.js. I checked that package.json, package-lock.json and git status are unchanged. From now on the lint ban is also written inside each prompt.
