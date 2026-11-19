@@ -16,6 +16,7 @@ import {
   IBMPlexMono_600SemiBold,
 } from "@expo-google-fonts/ibm-plex-mono";
 
+import { AuthProvider } from "@/context/AuthContext";
 import { colors, layout } from "@/theme";
 
 // Keep the splash screen up until we tell it to hide (after fonts load).
@@ -79,12 +80,15 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <View style={styles.frame}>
         {/* every screen is drawn inside this frame */}
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.paper },
-          }}
-        />
+        <AuthProvider>
+          {/* the login state is available to every screen below */}
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.paper },
+            }}
+          />
+        </AuthProvider>
       </View>
     </View>
   );

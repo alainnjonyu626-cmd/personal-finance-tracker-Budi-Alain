@@ -49,6 +49,21 @@ export const strings = {
     codeExpired: "That code has expired. Please request a new one.",
     saveFailed: "Something went wrong saving your data. Please try again.",
   },
+
+  // titles and words used on the screens (the real content comes later)
+  screens: {
+    appName: "Personal Finance Tracker",
+    login: "Log in",
+    register: "Create account",
+    forgotPassword: "Forgot password",
+    resetPassword: "Reset password",
+    reports: "Previous reports",
+    addReport: "Add report",
+    editReport: "Edit report",
+    logout: "Log out",
+    hello: "Hello",
+    comingSoon: "This screen is built in the next step.",
+  },
 } as const;
 
 export type Strings = typeof strings;

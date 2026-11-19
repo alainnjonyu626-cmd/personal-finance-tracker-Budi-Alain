@@ -292,3 +292,48 @@ Create or change only the files named above.
 ```
 **What it changed:** Created src/components/TextField.tsx, PasswordField.tsx, Button.tsx, Banner.tsx and index.ts. Added show/hide strings to src/strings/en.ts and a temporary Components check card to src/app/index.tsx.
 **Problems / fixes:** The model found and fixed two problems by looking at the page: a black browser focus box inside the focused input (now removed on web only), and a loading button with no spoken name (it now falls back to the title). It reported a focus-ring quirk when clicking between fields; I tested it myself: (write what you saw).
+
+
+## Prompt 4B: Login session and route guards
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/app/_layout.tsx, src/storage/auth.ts, src/types/models.ts, src/strings/en.ts, src/components/index.ts, src/theme/index.ts
+**Before sending:** I moved the old design-check screen with `git mv src/app/index.tsx src/app/dev-check.tsx` so the model does not have to copy a large file.
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: login session state and route guards. The screens are only placeholders for now (a title and links); they are filled in by later prompts. The old design-check screen was already moved to src/app/dev-check.tsx: do not touch it.
+
+1. In src/strings/en.ts add a new group `screens` (keep every existing group and key): appName: "Personal Finance Tracker", login: "Log in", register: "Create account", forgotPassword: "Forgot password", resetPassword: "Reset password", reports: "Previous reports", addReport: "Add report", editReport: "Edit report", logout: "Log out", hello: "Hello", comingSoon: "This screen is built in the next step."
+
+2. Create src/context/AuthContext.tsx:
+   - AuthProvider({ children }) holds `user: SessionUser | null` and `loading: boolean` (true at the start). On first mount call loadSession() from "@/storage/auth", set the user, then set loading to false (also set loading to false if it throws).
+   - signIn(user: SessionUser, remember: boolean): Promise<void>. Calls saveSession(user, remember), then setUser(user).
+   - signOut(): Promise<void>. Calls clearSession(), then setUser(null).
+   - export function useAuth() returning { user, loading, signIn, signOut }. It throws a clear Error if used outside AuthProvider.
+   - Use the SessionUser type from "@/types/models". Short plain-English comments.
+
+3. Edit src/app/_layout.tsx: wrap the existing <Stack> in <AuthProvider>. Change nothing else (fonts, splash screen and phone frame stay exactly as they are).
+
+4. Create src/app/index.tsx: while loading return null; if there is a user return <Redirect href="/reports" />, otherwise <Redirect href="/login" /> (Redirect from "expo-router").
+
+5. Create src/app/(auth)/_layout.tsx: while loading return null; if a user exists return <Redirect href="/reports" />; otherwise a Stack with headerShown false and contentStyle backgroundColor colors.paper.
+
+6. Create src/app/(app)/_layout.tsx: while loading return null; if there is no user return <Redirect href="/login" />; otherwise a Stack with headerShown false and contentStyle backgroundColor colors.paper.
+
+7. Create these placeholder screens. Each is a default export on a colors.paper background with spacing.xl padding, a title in typography.displayL and colors.ink taken from strings.screens, and one line strings.screens.comingSoon in typography.body and colors.inkSoft. Every Link has typography.bodyStrong, colors.forest and minHeight layout.minTouchTarget:
+   - src/app/(auth)/login.tsx: Links to "/register" (text strings.screens.register) and "/forgot-password" (text strings.screens.forgotPassword).
+   - src/app/(auth)/register.tsx: a Link back to "/login" (text strings.screens.login).
+   - src/app/(auth)/forgot-password.tsx: a Link to "/reset-password" and a Link back to "/login".
+   - src/app/(auth)/reset-password.tsx: a Link back to "/login".
+   - src/app/(app)/reports.tsx: shows `${strings.screens.hello}, ${user.name}` from useAuth, a Link to "/add-report", and a Button (from "@/components") titled strings.screens.logout that calls signOut. Do not navigate by hand: the guard redirects after signOut.
+   - src/app/(app)/add-report.tsx: a Link back to "/reports".
+   - src/app/(app)/edit-report/[id].tsx: shows the id from useLocalSearchParams (handle string | string[]) and a Link back to "/reports".
+
+RULES: no `any`, no type casts to silence errors. If TypeScript complains that a route does not exist, stop and tell me instead of working around it.
+
+Create or change only the files named above.
+```
+**What it changed:** (fill in after the model finishes)
+**Problems / fixes:** (fill in after checks)
