@@ -1,8 +1,15 @@
 import { Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Banner, Button, PasswordField, TextField } from "@/components";
+import {
+  AuthScreen,
+  Banner,
+  Button,
+  Icon,
+  PasswordField,
+  TextField,
+} from "@/components";
 import { resetPassword } from "@/storage/auth";
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
@@ -32,6 +39,8 @@ export default function ResetPasswordScreen() {
   );
   const [serviceError, setServiceError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [newCodeLinkFocused, setNewCodeLinkFocused] = useState(false);
+  const [loginLinkFocused, setLoginLinkFocused] = useState(false);
 
   function handleEmailChange(text: string) {
     setEmail(text);
@@ -98,115 +107,119 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
+    <AuthScreen
+      title={strings.screens.resetPassword}
+      subtitle={strings.auth.resetSubtitle}
+      footer={
+        <View style={styles.footer}>
+          <Link href="/forgot-password" asChild>
+            <Pressable
+              accessibilityRole="link"
+              onBlur={() => setNewCodeLinkFocused(false)}
+              onFocus={() => setNewCodeLinkFocused(true)}
+              style={[
+                styles.link,
+                newCodeLinkFocused && styles.linkFocused,
+              ]}
+            >
+              <Text style={styles.linkText}>{strings.auth.needNewCode}</Text>
+            </Pressable>
+          </Link>
+          <Link href="/login" asChild>
+            <Pressable
+              accessibilityRole="link"
+              onBlur={() => setLoginLinkFocused(false)}
+              onFocus={() => setLoginLinkFocused(true)}
+              style={[
+                styles.link,
+                loginLinkFocused && styles.linkFocused,
+              ]}
+            >
+              <Icon name="back" size={18} color={colors.forest} />
+              <Text style={styles.linkText}>{strings.auth.backToLogin}</Text>
+            </Pressable>
+          </Link>
+        </View>
+      }
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>{strings.screens.resetPassword}</Text>
-        <View style={styles.rule} />
-        <Text style={styles.subtitle}>{strings.auth.resetSubtitle}</Text>
-      </View>
+      <TextField
+        label={strings.auth.emailLabel}
+        value={email}
+        onChangeText={handleEmailChange}
+        error={emailError}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        returnKeyType="next"
+        leftElement={<Icon name="mail" size={20} color={colors.inkSoft} />}
+      />
 
-      <View style={styles.form}>
-        <TextField
-          label={strings.auth.emailLabel}
-          value={email}
-          onChangeText={handleEmailChange}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          returnKeyType="next"
-        />
+      <TextField
+        label={strings.auth.codeLabel}
+        value={code}
+        onChangeText={handleCodeChange}
+        error={codeError}
+        keyboardType="number-pad"
+        autoCapitalize="none"
+        returnKeyType="next"
+        leftElement={<Icon name="key" size={20} color={colors.inkSoft} />}
+      />
 
-        <TextField
-          label={strings.auth.codeLabel}
-          value={code}
-          onChangeText={handleCodeChange}
-          error={codeError}
-          keyboardType="number-pad"
-          autoCapitalize="none"
-          returnKeyType="next"
-        />
+      <PasswordField
+        label={strings.auth.newPasswordLabel}
+        value={newPassword}
+        onChangeText={handleNewPasswordChange}
+        error={newPasswordError}
+        helper={strings.auth.passwordHelper}
+        autoComplete="new-password"
+        returnKeyType="next"
+        leftElement={<Icon name="lock" size={20} color={colors.inkSoft} />}
+      />
 
-        <PasswordField
-          label={strings.auth.newPasswordLabel}
-          value={newPassword}
-          onChangeText={handleNewPasswordChange}
-          error={newPasswordError}
-          helper={strings.auth.passwordHelper}
-          autoComplete="new-password"
-          returnKeyType="next"
-        />
+      <PasswordField
+        label={strings.auth.confirmNewLabel}
+        value={confirmPassword}
+        onChangeText={handleConfirmPasswordChange}
+        error={confirmPasswordError}
+        returnKeyType="done"
+        onSubmitEditing={handleSubmit}
+        leftElement={<Icon name="lock" size={20} color={colors.inkSoft} />}
+      />
 
-        <PasswordField
-          label={strings.auth.confirmNewLabel}
-          value={confirmPassword}
-          onChangeText={handleConfirmPasswordChange}
-          error={confirmPasswordError}
-          returnKeyType="done"
-          onSubmitEditing={handleSubmit}
-        />
+      <Banner message={serviceError} tone="error" />
 
-        <Banner message={serviceError} tone="error" />
-
-        <Button
-          title={working ? strings.auth.resetting : strings.screens.resetPassword}
-          onPress={handleSubmit}
-          loading={working}
-        />
-
-        <Link href="/forgot-password" style={styles.link}>
-          {strings.auth.needNewCode}
-        </Link>
-        <Link href="/login" style={styles.link}>
-          {strings.auth.backToLogin}
-        </Link>
-      </View>
-    </ScrollView>
+      <Button
+        title={working ? strings.auth.resetting : strings.screens.resetPassword}
+        onPress={handleSubmit}
+        loading={working}
+      />
+    </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.lg,
-    width: "100%",
-    maxWidth: layout.maxContentWidth,
-    alignSelf: "center",
-  },
-  header: {
+  footer: {
+    alignItems: "center",
     gap: spacing.sm,
   },
-  title: {
-    ...typography.displayL,
-    color: colors.ink,
-  },
-  rule: {
-    height: 3,
-    width: spacing.huge,
-    backgroundColor: colors.gold,
-    borderRadius: radius.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.inkSoft,
-  },
-  form: {
-    gap: spacing.lg,
-  },
   link: {
-    ...typography.bodyStrong,
-    color: colors.forest,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.sm,
     minHeight: layout.minTouchTarget,
     paddingVertical: spacing.md,
+    outlineWidth: 2,
+    outlineStyle: "solid",
+    outlineColor: "transparent",
+    outlineOffset: 2,
+    borderRadius: radius.sm,
+  },
+  linkFocused: {
+    outlineColor: colors.gold,
+  },
+  linkText: {
+    ...typography.bodyStrong,
+    color: colors.forest,
   },
 });

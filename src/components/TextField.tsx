@@ -21,6 +21,32 @@ import {
 
 import { colors, layout, radius, spacing, typography } from "@/theme";
 
+function installAutofillFix() {
+  if (
+    Platform.OS !== "web" ||
+    typeof document === "undefined" ||
+    document.getElementById("pft-autofill-fix") !== null
+  ) {
+    return;
+  }
+
+  const style = document.createElement("style");
+  style.id = "pft-autofill-fix";
+  style.textContent = `
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px ${colors.paperDeep} inset !important;
+      -webkit-text-fill-color: ${colors.ink} !important;
+      caret-color: ${colors.ink} !important;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+installAutofillFix();
+
 // The list of props a TextField accepts. PasswordField reuses it.
 export interface TextFieldProps {
   // the little uppercase name above the box
@@ -51,6 +77,10 @@ export interface TextFieldProps {
   onSubmitEditing?: () => void;
   // anything placed on the right inside the box (like a Show/Hide button)
   rightElement?: ReactNode;
+  // optional content placed on the left inside the box
+  leftElement?: ReactNode;
+  // larger input style for amounts
+  size?: "default" | "large";
 }
 
 export function TextField({
@@ -68,6 +98,8 @@ export function TextField({
   returnKeyType,
   onSubmitEditing,
   rightElement,
+  leftElement,
+  size = "default",
 }: TextFieldProps) {
   // true while this box has the focus, so we can draw the gold ring
   const [focused, setFocused] = useState(false);
@@ -87,10 +119,13 @@ export function TextField({
       <View
         style={[
           styles.box,
+          size === "large" && styles.boxLarge,
           focused && styles.boxFocused,
           hasError && styles.boxError,
         ]}
       >
+        {leftElement ? <View style={styles.left}>{leftElement}</View> : null}
+
         <TextInput
           value={value}
           onChangeText={onChangeText}
@@ -111,7 +146,11 @@ export function TextField({
           {...(Platform.OS === "web" && hasError
             ? { "aria-invalid": true as const }
             : {})}
-          style={[styles.input, Platform.OS === "web" && styles.inputWeb]}
+          style={[
+            styles.input,
+            size === "large" && styles.inputLarge,
+            Platform.OS === "web" && styles.inputWeb,
+          ]}
         />
 
         {/* optional content on the right, such as a Show/Hide button */}
@@ -160,6 +199,9 @@ const styles = StyleSheet.create({
     outlineColor: "transparent",
     outlineOffset: 2,
   },
+  boxLarge: {
+    minHeight: 64,
+  },
   // gold ring while the box has the focus
   boxFocused: {
     outlineColor: colors.gold,
@@ -178,6 +220,9 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.ink,
   },
+  inputLarge: {
+    ...typography.amountL,
+  },
 
   // no border of its own and no visible outline on the web: the box around
   // it draws the border and the gold focus ring. The outline stays solid and
@@ -191,6 +236,10 @@ const styles = StyleSheet.create({
   // the Show/Hide button sits on the right, a small gap from the text
   right: {
     marginLeft: spacing.sm,
+  },
+  left: {
+    alignItems: "center",
+    marginRight: spacing.sm,
   },
 
   // the two possible lines under the box

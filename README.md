@@ -13,10 +13,10 @@ A React Native (Expo) mobile app where a user signs in, records each income or e
 - **Data survives a reload:** everything is stored in the browser with AsyncStorage.
 
 ### Bonus features
+### Bonus features
 - Logout
 - Remember me (keeps the user logged in after a reload)
-
-Not built: delete a report, search or filter, monthly chart, CSV or PDF export.
+- Hide or show the balance (the choice is remembered after a reload)
 
 ## Tech
 - React Native with Expo SDK 58, Expo Router (one file in `src/app` is one screen), TypeScript
@@ -55,7 +55,7 @@ To try Forgot Password, use the email of an account you registered.
 ```
 src/
   app/          screens (login, register, forgot-password, reset-password, reports, add-report, edit-report)
-  components/   TextField, PasswordField, Button, Banner, ReportForm
+    components/   TextField, PasswordField, Button, Banner, Icon, AuthScreen, ReportForm
   context/      AuthContext (who is logged in)
   storage/      storage helpers, accounts service, reports service
   theme/        colours, fonts, spacing

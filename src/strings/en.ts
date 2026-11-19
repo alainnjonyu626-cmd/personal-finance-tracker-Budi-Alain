@@ -85,10 +85,18 @@ export const strings = {
   },
 
   reports: {
+    greetingMorning: "Good morning",
+    greetingAfternoon: "Good afternoon",
+    greetingEvening: "Good evening",
     balanceLabel: "Current balance",
+    hideBalance: "Hide balance",
+    showBalance: "Show balance",
+    hiddenValue: "••••••",
+    hiddenLabel: "Hidden",
     incomeLabel: "Total income",
     expensesLabel: "Total expenses",
     listTitle: "All reports",
+    countLabel: "reports",
     emptyTitle: "No reports yet",
     emptyHint: "Tap Add report to record your first income or expense.",
     addButton: "Add report",
@@ -98,6 +106,8 @@ export const strings = {
   },
 
   form: {
+    addSubtitle: "Record money coming in or going out.",
+    editSubtitle: "Update the details of this report.",
     nameLabel: "Name",
     namePlaceholder: "e.g. Salary, Market shopping, Taxi fare",
     typeLabel: "Type",
@@ -106,6 +116,8 @@ export const strings = {
     dateLabel: "Date",
     dateHelper: "Format: YYYY-MM-DD",
     useToday: "Use today",
+    today: "Today",
+    yesterday: "Yesterday",
     saveReport: "Save",
     saving: "Saving…",
     notFoundTitle: "Report not found",
