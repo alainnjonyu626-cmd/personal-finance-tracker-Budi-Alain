@@ -337,3 +337,36 @@ Create or change only the files named above.
 ```
 **What it changed:** Created src/context/AuthContext.tsx (AuthProvider, useAuth, signIn, signOut), src/app/index.tsx (redirects), the (auth) and (app) route group layouts that guard the screens, and placeholder screens for login, register, forgot-password, reset-password, reports, add-report and edit-report/[id]. Added the `screens` strings group and wrapped the layout in AuthProvider. The old design-check screen was moved to src/app/dev-check.tsx.
 **Problems / fixes:** The route types were out of date, so TypeScript rejected every route; the model regenerated them with Expo's own generator (a git-ignored file). The model also ran `npx expo lint` against the header rule. It reported creating and deleting eslint.config.js. I checked that package.json, package-lock.json and git status are unchanged. From now on the lint ban is also written inside each prompt.
+
+
+## Prompt 5A: Register and Login screens
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/theme/index.ts, src/components/index.ts, src/components/TextField.tsx, src/components/PasswordField.tsx, src/context/AuthContext.tsx, src/storage/auth.ts, src/utils/validation.ts, src/app/(auth)/login.tsx, src/app/(auth)/register.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md. HARD RULE: do not run `npx expo lint`, `npx expo install`, `npm install`, `npx eslint` or any command that installs or changes packages or config files. Only edit the files I name. If TypeScript complains about a route, stop and tell me.
+
+TASK: build the real Login and Register screens. Both use the existing components from "@/components", the validators from "@/utils/validation", the services from "@/storage/auth" and useAuth from "@/context/AuthContext". All words come from src/strings/en.ts and all styling from the theme.
+
+1. In src/strings/en.ts add a new group `auth` (keep every existing group and key): loginSubtitle: "Welcome back. Your money notebook is waiting.", registerSubtitle: "Create your account to start tracking your money.", nameLabel: "Full name", emailLabel: "Email", passwordLabel: "Password", confirmLabel: "Confirm password", rememberMe: "Remember me", loggingIn: "Logging in…", creating: "Creating account…", noAccount: "No account yet?", haveAccount: "Already have an account?", forgotLink: "Forgot password?", accountCreated: "Account created. Please log in.", passwordHelper: "At least 6 characters".
+
+2. Replace src/app/(auth)/login.tsx with the real Login screen (default export):
+   - A ScrollView with keyboardShouldPersistTaps="handled", colors.paper background, spacing.xl padding, and a content column that is centered vertically when there is room.
+   - Header: strings.screens.appName in typography.displayL (colors.ink), a 3px colors.gold rule about spacing.huge wide under it, then strings.auth.loginSubtitle in typography.body and colors.inkSoft.
+   - If the route param `registered` equals "1" (useLocalSearchParams) show a success Banner with strings.auth.accountCreated above the form.
+   - Form: TextField for email (keyboardType "email-address", autoCapitalize "none", autoComplete "email"), PasswordField (autoComplete "current-password"), a "Remember me" checkbox row (a Pressable with a 24px box, colors.forest border, filled colors.forest with a "✓" in colors.paper when checked, a label in typography.body, accessibilityRole="checkbox", accessibilityState { checked }, row height at least layout.minTouchTarget, gold keyboard focus ring like the Button), an error Banner for service errors, and a primary Button strings.screens.login (title strings.auth.loggingIn and loading while working).
+   - Behaviour: on submit, first validate email (validateEmail) and password (validateRequired: use validatePassword's "empty" case only, so show strings.errors.passwordRequired for an empty password but do NOT show the too-short message at login). Show the messages under the fields and do not call the service if anything is invalid. Otherwise call loginUser(email, password). On failure show the service error in the Banner. On success call signIn(user, remember). Do NOT navigate by hand: the (auth) layout redirects to /reports once the user is set.
+   - Editing a field clears that field's error and the Banner. The last field's onSubmitEditing submits the form. Pressing the button twice must not run two requests (ignore while loading).
+   - Under the form: a row with strings.auth.noAccount and a Link to "/register" (text strings.screens.register), and a Link to "/forgot-password" (text strings.auth.forgotLink). All links typography.bodyStrong, colors.forest, minHeight layout.minTouchTarget.
+
+3. Replace src/app/(auth)/register.tsx with the real Register screen (default export), same layout and header style with strings.auth.registerSubtitle:
+   - Fields: full name (autoCapitalize "words", autoComplete "name"), email, PasswordField with helper strings.auth.passwordHelper (autoComplete "new-password"), PasswordField for confirm password (strings.auth.confirmLabel).
+   - Behaviour: on submit run validateName, validateEmail, validatePassword and validateConfirmPassword(password, confirm), show all messages under their fields, and stop if any exists. Otherwise call registerUser({ name, email, password }). On failure show the service error in the Banner (for example the duplicate email message). On success use router.replace with pathname "/login" and params { registered: "1" } (router from "expo-router"). Do NOT sign the user in.
+   - Same rules: editing clears errors, last field submits, double presses ignored while loading, button title strings.auth.creating while loading.
+   - Under the form: strings.auth.haveAccount and a Link to "/login" (text strings.screens.login).
+
+Create or change only src/strings/en.ts, src/app/(auth)/login.tsx and src/app/(auth)/register.tsx.
+```
+**What it changed:** Added the `auth` strings group to src/strings/en.ts and replaced the placeholder login and register screens with the real ones: validation, service errors in a Banner, a Remember me checkbox, and a success message on Login after registering.
+**Problems / fixes:** The model ran no lint or install commands. It could not confirm from code that the gold focus ring shows on the Remember me row, so I tested it in the browser. Register, login, wrong password, remember me and logout all passed my browser test. Login only checks that the password is not empty; password length is enforced at Register and Reset.

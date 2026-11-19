@@ -50,6 +50,24 @@ export const strings = {
     saveFailed: "Something went wrong saving your data. Please try again.",
   },
 
+  // words used by the login and register forms only
+  auth: {
+    loginSubtitle: "Welcome back. Your money notebook is waiting.",
+    registerSubtitle: "Create your account to start tracking your money.",
+    nameLabel: "Full name",
+    emailLabel: "Email",
+    passwordLabel: "Password",
+    confirmLabel: "Confirm password",
+    rememberMe: "Remember me",
+    loggingIn: "Logging in…",
+    creating: "Creating account…",
+    noAccount: "No account yet?",
+    haveAccount: "Already have an account?",
+    forgotLink: "Forgot password?",
+    accountCreated: "Account created. Please log in.",
+    passwordHelper: "At least 6 characters",
+  },
+
   // titles and words used on the screens (the real content comes later)
   screens: {
     appName: "Personal Finance Tracker",
