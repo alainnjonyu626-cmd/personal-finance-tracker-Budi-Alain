@@ -597,5 +597,5 @@ All colours, fonts and sizes come from the theme (the exact pixel sizes above ar
 
 Create or change only: src/app/(auth)/forgot-password.tsx and src/app/(auth)/reset-password.tsx.
 ```
-**What it changed:** (fill in after the model finishes)
-**Problems / fixes:** (fill in after checks)
+***What it changed:** Moved Forgot Password and Reset Password into the shared AuthScreen shell with icons in every field. The reset code now shows on a forest-green card as six separate digit boxes with a gold coin motif, and the card fades in each time a new code is shown.
+**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the two named screens, tsc and both searches were clean. I retested the full flow: unknown email message, code card, wrong code rejected, new password works, old password fails, and a code cannot be used twice. (Write anything that went wrong.)
