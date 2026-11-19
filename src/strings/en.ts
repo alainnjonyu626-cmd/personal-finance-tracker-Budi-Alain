@@ -11,6 +11,12 @@ export const strings = {
     cancel: "Cancel",
     back: "Back",
     loading: "Loading…",
+    // shown inside a password field to reveal or hide what was typed
+    show: "Show",
+    hide: "Hide",
+    // spoken by a screen reader for the same show/hide button
+    showPassword: "Show password",
+    hidePassword: "Hide password",
   },
 
   // messages shown under an input when something is wrong

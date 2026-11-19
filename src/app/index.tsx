@@ -14,6 +14,12 @@ import {
   resetPassword,
 } from "@/storage/auth";
 import { STORAGE_KEYS, readJSON, removeKey } from "@/storage/storage";
+import {
+  Banner,
+  Button,
+  PasswordField,
+  TextField,
+} from "@/components";
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
 import type { Report, User } from "@/types/models";
@@ -160,6 +166,13 @@ export default function DesignCheck() {
           reset really work. Delete this block later.
          ================================================================= */}
       <AccountsSelfTest />
+
+      {/* =================================================================
+          Components check (temporary)
+          Shows every new reusable component in all its states, so we can
+          see them on screen. Delete this block later.
+         ================================================================= */}
+      <ComponentsCheck />
     </ScrollView>
   );
 }
@@ -381,6 +394,64 @@ function AccountsSelfTest() {
           {allPassed ? "All steps passed ✅" : "Some steps failed ❌"}
         </Text>
       ) : null}
+    </View>
+  );
+}
+
+// ---- Components check (temporary) ----
+// Puts every new component on screen in its different states.
+// Plain English labels are allowed here because this block is temporary.
+function ComponentsCheck() {
+  // the values typed into the two live fields
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+
+  return (
+    <View style={styles.testCard}>
+      <Text style={styles.label}>Components check (temporary)</Text>
+
+      {/* a normal text field, typed by the user */}
+      <TextField
+        label="Name"
+        value={name}
+        onChangeText={setName}
+        placeholder="Your full name"
+        autoCapitalize="words"
+      />
+
+      {/* a password field with its Show/Hide button and a helper line */}
+      <PasswordField
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        helper="At least 6 characters"
+        autoCapitalize="none"
+      />
+
+      {/* a field showing the error state (the helper is replaced by the error) */}
+      <TextField
+        label="Email"
+        value="budi@example"
+        onChangeText={() => {}}
+        error="That email doesn't look right. Example: name@example.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+
+      {/* the three button looks */}
+      <Button title="Primary button" onPress={() => {}} />
+      <Button title="Secondary button" onPress={() => {}} variant="secondary" />
+      <Button title="Danger button" onPress={() => {}} variant="danger" />
+
+      {/* a primary button that cannot be pressed */}
+      <Button title="Disabled button" onPress={() => {}} disabled />
+
+      {/* a primary button that is busy */}
+      <Button title="Loading button" onPress={() => {}} loading />
+
+      {/* the two banner looks */}
+      <Banner message="Something went wrong saving your report." />
+      <Banner message="Your report was saved." tone="success" />
     </View>
   );
 }

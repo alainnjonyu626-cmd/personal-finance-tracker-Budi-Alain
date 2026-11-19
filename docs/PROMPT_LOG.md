@@ -250,3 +250,45 @@ Create only src/storage/reports.ts.
 ```
 **What it changed:** Created src/storage/reports.ts with ReportInput and getUserReports, getReport, addReport, updateReport and deleteReport. Every function takes a userId, so one user can never read, edit or delete another user's report.
 **Problems / fixes:** None. The model did not run lint or install packages. Notes: a missing or not-owned report returns saveFailed; the service checks that the amount is above 0 but not the maximum (the screens use validateAmount first); an empty date returns dateInvalid.
+
+
+## Prompt 4A: Reusable components (fields, button, banner)
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/theme/index.ts, src/theme/colors.ts, src/theme/typography.ts, src/theme/spacing.ts, src/strings/en.ts, src/app/index.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: four reusable UI components plus a temporary visual check. Use only the theme (colors, typography, spacing, radius, layout) and strings. No other screens.
+
+1. In src/strings/en.ts add to the existing `common` group (keep every existing key): show: "Show", hide: "Hide", showPassword: "Show password", hidePassword: "Hide password".
+
+2. Create src/components/TextField.tsx. Props: label: string; value: string; onChangeText: (text: string) => void; error?: string | null; helper?: string; placeholder?: string; keyboardType?: KeyboardTypeOptions; autoCapitalize?: "none" | "sentences" | "words"; autoComplete?: TextInputProps["autoComplete"]; secureTextEntry?: boolean; editable?: boolean; returnKeyType?: ReturnKeyTypeOptions; onSubmitEditing?: () => void; rightElement?: ReactNode.
+   - Layout: the label above (typography.label, colors.inkSoft), then the input box, then the helper or error text below.
+   - Input box: minHeight layout.minTouchTarget, backgroundColor colors.paperDeep, 1px colors.line border, radius.md, horizontal padding spacing.lg, text typography.body in colors.ink, placeholderTextColor colors.inkSoft. rightElement sits inside the box on the right.
+   - Focus: when focused show a gold ring using colors.gold, drawn OUTSIDE the box with the same outline technique as the Save button in src/app/index.tsx (outlineWidth 2, outlineStyle solid, outlineColor transparent until focused, outlineOffset 2), so the box never changes size. Turn off the browser's default outline on the input itself.
+   - Error state: the border becomes colors.expense and the error text appears under the box in typography.caption and colors.expense, starting with "⚠ " so it is not shown by colour alone. Give that text accessibilityRole="alert". When there is an error, show it instead of the helper text.
+   - Accessibility: accessibilityLabel equals the label; on web also pass aria-invalid when there is an error.
+
+3. Create src/components/PasswordField.tsx: uses TextField with secureTextEntry controlled by a "Show" / "Hide" Pressable placed as the rightElement. The Pressable is at least layout.minTouchTarget tall, uses typography.bodyStrong in colors.forest, and has accessibilityRole="button" and an accessibilityLabel from strings.common.showPassword / hidePassword. It accepts the same props as TextField except secureTextEntry and rightElement.
+
+4. Create src/components/Button.tsx. Props: title: string; onPress: () => void; variant?: "primary" | "secondary" | "danger" (default "primary"); disabled?: boolean; loading?: boolean; accessibilityLabel?: string.
+   - minHeight layout.minTouchTarget, radius.md, centered text in typography.bodyStrong.
+   - primary: background colors.forest, text colors.paper, pressed colors.forestPressed.
+   - secondary: transparent background, 1.5px colors.forest border, text colors.forest, pressed background colors.paperDeep.
+   - danger: background colors.expense, text colors.paper, pressed opacity 0.85.
+   - disabled or loading: background colors.disabled, text colors.inkSoft, presses ignored. While loading show an ActivityIndicator (color colors.inkSoft) instead of the title.
+   - Keyboard focus ring in colors.gold exactly like the Save button in src/app/index.tsx (no size change).
+   - accessibilityRole="button" and accessibilityState { disabled, busy: loading }.
+
+5. Create src/components/Banner.tsx. Props: message?: string | null; tone?: "error" | "success" (default "error"). Renders nothing when message is empty. error: background colors.expenseTint, 1px colors.expense border, text colors.expense, prefix "⚠ ". success: background colors.incomeTint, 1px colors.income border, text colors.income, prefix "✓ ". radius.md, padding spacing.md, typography.body, accessibilityRole="alert".
+
+6. Create src/components/index.ts that re-exports TextField, PasswordField, Button and Banner.
+
+7. In src/app/index.tsx ADD a clearly commented temporary section "Components check (temporary)" at the bottom of the screen (do not change the rest). It shows: a TextField with its own useState value (label "Name"); a PasswordField with state (label "Password", helper "At least 6 characters"); a TextField in the error state (label "Email", error "That email doesn't look right. Example: name@example.com"); a primary Button, a secondary Button and a danger Button; a disabled primary Button; a primary Button with loading; an error Banner and a success Banner. Plain English text is allowed in this temporary section.
+
+Create or change only the files named above.
+```
+**What it changed:** Created src/components/TextField.tsx, PasswordField.tsx, Button.tsx, Banner.tsx and index.ts. Added show/hide strings to src/strings/en.ts and a temporary Components check card to src/app/index.tsx.
+**Problems / fixes:** The model found and fixed two problems by looking at the page: a black browser focus box inside the focused input (now removed on web only), and a loading button with no spoken name (it now falls back to the title). It reported a focus-ring quirk when clicking between fields; I tested it myself: (write what you saw).
