@@ -372,13 +372,14 @@ Create or change only src/strings/en.ts, src/app/(auth)/login.tsx and src/app/(a
 **Problems / fixes:** The model ran no lint or install commands. It could not confirm from code that the gold focus ring shows on the Remember me row, so I tested it in the browser. Register, login, wrong password, remember me and logout all passed my browser test. Login only checks that the password is not empty; password length is enforced at Register and Reset.
 
 
+
 ## Prompt 5B: Forgot Password and Recover Password screens
 **Date:** 19 Nov 2026
-**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Tool / model:** GitHub Copilot (Copilot Fusion)
 **Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/theme/index.ts, src/components/index.ts, src/components/TextField.tsx, src/components/PasswordField.tsx, src/storage/auth.ts, src/utils/validation.ts, src/app/(auth)/login.tsx, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx
 **Prompt:**
 ```
-Follow the rules in the attached docs/PROMPT_HEADER.md. HARD RULE: do not run `npx expo lint`, `npx expo install`, `npm install`, `npx eslint` or any command that installs or changes packages or config files. Only edit the files I name. If TypeScript complains about a route, stop and tell me.
+Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
 
 TASK: build the real Forgot Password and Recover (Reset) Password screens. Copy the layout, header style (app title in typography.displayL, 3px colors.gold rule, subtitle), ScrollView settings, link styling and form behaviour patterns from the attached src/app/(auth)/login.tsx so all screens look the same. Use components from "@/components", validators from "@/utils/validation" and the services from "@/storage/auth". All words come from src/strings/en.ts, all styling from the theme.
 

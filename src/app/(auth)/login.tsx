@@ -16,10 +16,11 @@ import { colors, layout, radius, spacing, typography } from "@/theme";
 import { validateEmail } from "@/utils/validation";
 
 export default function LoginScreen() {
-  // Read the route params, so /login?registered=1 can show the success banner.
-  const params = useLocalSearchParams<{ registered?: string }>();
+  // Read the route params for success banners after registration or recovery.
+  const params = useLocalSearchParams<{ registered?: string; reset?: string }>();
   // The success banner is shown right after a successful registration.
   const justRegistered = params.registered === "1";
+  const justReset = params.reset === "1";
 
   // The user state of the whole app (signIn logs the user in).
   const { signIn } = useAuth();
@@ -102,6 +103,8 @@ export default function LoginScreen() {
       {/* shown once, right after the account was created */}
       {justRegistered ? (
         <Banner message={strings.auth.accountCreated} tone="success" />
+      ) : justReset ? (
+        <Banner message={strings.auth.passwordUpdated} tone="success" />
       ) : null}
 
       {/* the form */}
