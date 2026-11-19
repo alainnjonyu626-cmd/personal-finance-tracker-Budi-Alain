@@ -248,5 +248,5 @@ Exports:
 
 Create only src/storage/reports.ts.
 ```
-**What it changed:** (fill in after the model finishes)
-**Problems / fixes:** (fill in after checks)
+**What it changed:** Created src/storage/reports.ts with ReportInput and getUserReports, getReport, addReport, updateReport and deleteReport. Every function takes a userId, so one user can never read, edit or delete another user's report.
+**Problems / fixes:** None. The model did not run lint or install packages. Notes: a missing or not-owned report returns saveFailed; the service checks that the amount is above 0 but not the maximum (the screens use validateAmount first); an empty date returns dateInvalid.
