@@ -370,3 +370,38 @@ Create or change only src/strings/en.ts, src/app/(auth)/login.tsx and src/app/(a
 ```
 **What it changed:** Added the `auth` strings group to src/strings/en.ts and replaced the placeholder login and register screens with the real ones: validation, service errors in a Banner, a Remember me checkbox, and a success message on Login after registering.
 **Problems / fixes:** The model ran no lint or install commands. It could not confirm from code that the gold focus ring shows on the Remember me row, so I tested it in the browser. Register, login, wrong password, remember me and logout all passed my browser test. Login only checks that the password is not empty; password length is enforced at Register and Reset.
+
+
+## Prompt 5B: Forgot Password and Recover Password screens
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/theme/index.ts, src/components/index.ts, src/components/TextField.tsx, src/components/PasswordField.tsx, src/storage/auth.ts, src/utils/validation.ts, src/app/(auth)/login.tsx, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md. HARD RULE: do not run `npx expo lint`, `npx expo install`, `npm install`, `npx eslint` or any command that installs or changes packages or config files. Only edit the files I name. If TypeScript complains about a route, stop and tell me.
+
+TASK: build the real Forgot Password and Recover (Reset) Password screens. Copy the layout, header style (app title in typography.displayL, 3px colors.gold rule, subtitle), ScrollView settings, link styling and form behaviour patterns from the attached src/app/(auth)/login.tsx so all screens look the same. Use components from "@/components", validators from "@/utils/validation" and the services from "@/storage/auth". All words come from src/strings/en.ts, all styling from the theme.
+
+1. In src/strings/en.ts add these keys to the existing `auth` group (keep every existing key and group): forgotSubtitle: "Enter your registered email and we will give you a reset code.", resetSubtitle: "Enter the code and choose a new password.", sendCode: "Send reset code", sending: "Sending…", codeLabel: "Reset code", newPasswordLabel: "New password", confirmNewLabel: "Confirm new password", resetting: "Resetting…", yourCode: "Your reset code", codeNote: "In a real app this code would be sent to your email.", validForPrefix: "Valid for", minutesWord: "minutes", continue: "Continue", needNewCode: "Need a new code?", backToLogin: "Back to log in", passwordUpdated: "Password updated. Please log in with your new password."
+
+2. Replace src/app/(auth)/forgot-password.tsx (default export):
+   - Header with strings.screens.forgotPassword as the title and strings.auth.forgotSubtitle.
+   - One email TextField (same props as on the login screen), an error Banner for service errors, and a primary Button strings.auth.sendCode (title strings.auth.sending and loading while working).
+   - On submit: validateEmail first and show its message under the field (do not call the service if invalid). Otherwise call requestPasswordReset(email). On failure show the service error in the Banner (this includes the helpful "email not found" message). On success keep the email in state and show a "code card" below the form: a View with background colors.paperDeep, a 2px colors.gold border, radius.md and padding spacing.lg containing the label strings.auth.yourCode (typography.label, colors.inkSoft), the code in typography.amountL and colors.ink with letterSpacing 4, the line `${strings.auth.validForPrefix} ${RESET_CODE_MINUTES} ${strings.auth.minutesWord}` (RESET_CODE_MINUTES is exported by "@/storage/auth") in typography.caption and colors.inkSoft, and strings.auth.codeNote in typography.caption and colors.inkSoft. Under the card a primary Button strings.auth.continue that calls router.push({ pathname: "/reset-password", params: { email } }). Never put the code in the route params.
+   - Editing the email clears its error, the Banner and any shown code card. Pressing submit again simply creates a new code. Double presses are ignored while loading. The email field's onSubmitEditing submits.
+   - A Link back to "/login" with text strings.auth.backToLogin (typography.bodyStrong, colors.forest, minHeight layout.minTouchTarget).
+
+3. Replace src/app/(auth)/reset-password.tsx (default export):
+   - Header with strings.screens.resetPassword and strings.auth.resetSubtitle.
+   - Read the `email` route param with useLocalSearchParams (handle string | string[]) and use it as the starting value of the email field (the user can still edit it).
+   - Fields in this order: email TextField, reset code TextField (label strings.auth.codeLabel, keyboardType "number-pad", autoCapitalize "none"), PasswordField for the new password (label strings.auth.newPasswordLabel, helper strings.auth.passwordHelper, autoComplete "new-password"), PasswordField for confirming (label strings.auth.confirmNewLabel). An error Banner, and a primary Button with the title strings.screens.resetPassword (title strings.auth.resetting and loading while working).
+   - On submit run validateEmail, validateResetCode, validatePassword and validateConfirmPassword(newPassword, confirm), show every message under its own field, and stop if any exists. Otherwise call resetPassword(email, code, newPassword). On failure show the service error in the Banner (wrong code, expired code or email not found). On success use router.replace({ pathname: "/login", params: { reset: "1" } }).
+   - Editing a field clears that field's error and the Banner. The last field's onSubmitEditing submits. Double presses are ignored while loading.
+   - Two Links under the form: strings.auth.needNewCode to "/forgot-password" and strings.auth.backToLogin to "/login" (same link style).
+
+4. Edit src/app/(auth)/login.tsx with the smallest change possible: when the route param `reset` equals "1", show a success Banner with strings.auth.passwordUpdated in the same place where the existing `registered` banner is shown (only one banner at a time; if both params were present show the registered one). Change nothing else in that file.
+
+Create or change only src/strings/en.ts, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx and src/app/(auth)/login.tsx.
+```
+**What it changed:** (fill in after the model finishes)
+**Problems / fixes:** (fill in after checks)
