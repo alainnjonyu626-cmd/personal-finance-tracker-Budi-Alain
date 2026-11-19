@@ -51,11 +51,14 @@ WHEN YOU FINISH: (a) list every file you created or changed, (b) explain each fi
 **What it changed:** Created src/theme/colors.ts, typography.ts, spacing.ts, index.ts and src/strings/en.ts. Edited src/app/_layout.tsx (fonts, splash screen, phone frame) and src/app/index.tsx (design-check screen).
 **Problems / fixes:** The AI credits ran out right after the files were written, so I switched to the free DeepSeek V4.1 Flash model for the next prompts. After reviewing the code I found a `fontWeight` line on every text style that duplicated the weight already in the font name (for example Fraunces_700Bold) and removed those lines. Checked with `npx tsc --noEmit` (clean), searches for stray hex colors, pure black/white and `any` (none found), and in the browser.
 
--## Prompt 2A: Data types, money format and date helpers
+-
+## Prompt 2A: Data types, money format and date helpers
 **Date:** 19 Nov 2026
 **Tool / model:** CodeGPT, DeepSeek V4.1 Flash
 **Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts
-**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
 
 TASK: data types and formatting helpers. No screens.
 
@@ -78,15 +81,18 @@ TASK: data types and formatting helpers. No screens.
    - formatDisplayDate(value: string): string. "2026-11-01" becomes "01 Nov 2026". Use a hand-written list of month names Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec. No Intl.
    Required results: toISODate(new Date(2026, 10, 1)) = "2026-11-01"; isValidISODate("2026-02-30") = false; isValidISODate("2026-11-1") = false; isValidISODate("2026-11-15") = true; formatDisplayDate("2026-11-01") = "01 Nov 2026".
 
-Create or change only these three files.)
+Create or change only these three files.
+```
 **What it changed:** Created src/types/models.ts, src/utils/money.ts and src/utils/dates.ts.
-**Problems / fixes:** The model ran `npx expo lint`, which tried to install ESLint and edited package.json. It reverted the change itself; I confirmed with `git diff` that package.json is unchanged. I added a rule to the prompt header forbidding lint and install commands. toISOString is avoided on purpose, because it uses UTC and Douala is UTC+1, so near midnight it could give the wrong day.
+**Problems / fixes:** The model ran `npx expo lint`, which tried to install ESLint and edited package.json. It reverted the change itself and I confirmed with `git diff` that package.json was unchanged. I then added a rule to docs/PROMPT_HEADER.md forbidding lint and install commands. Dates avoid toISOString on purpose: it uses UTC and Douala is UTC+1, so near midnight it could give the wrong day.
 
 ## Prompt 2B: Validation helpers and error messages
 **Date:** 19 Nov 2026
 **Tool / model:** CodeGPT, DeepSeek V4.1 Flash
 **Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/utils/money.ts, src/utils/dates.ts
-**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
 
 TASK: validation helpers and error messages. No screens.
 
@@ -124,15 +130,18 @@ TASK: validation helpers and error messages. No screens.
 
    Required results: validateAmount("18,500") = null; validateAmount("18500") = null; validateAmount("0") = amountNotPositive; validateAmount("-50") = amountNotPositive; validateAmount("abc") = amountInvalid; validateAmount("") = amountRequired; validateAmount("1000000000") = amountTooLarge; validateEmail("Budi@Mail.com") = null; validateEmail("budi@") = emailInvalid; validatePassword("12345") = passwordTooShort; parseAmount("18,500") = 18500.
 
-Create or change only src/strings/en.ts and src/utils/validation.ts.)
+Create or change only src/strings/en.ts and src/utils/validation.ts.
+```
 **What it changed:** Added the `errors` group to src/strings/en.ts and created src/utils/validation.ts (name, email, password, confirm password, report name, type, amount and date validators).
-**Problems / fixes:** None. The model tested every required example in Node and `tsc` is clean. Decisions: minimum password length 6 (the brief gives none); emails are normalized by the accounts service before saving; amounts that become Infinity are rejected.
+**Problems / fixes:** None. The model tested every required example in Node and `tsc` was clean. Decisions: minimum password length is 6 (the brief gives none); emails are normalized by the accounts service before saving; amounts that would become Infinity are rejected.
 
 ## Prompt 2C: Balance calculation helpers and visual test
 **Date:** 19 Nov 2026
 **Tool / model:** CodeGPT, DeepSeek V4.1 Flash
 **Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts, src/utils/money.ts, src/app/index.tsx
-**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
 
 TASK: balance helpers and a temporary visual test.
 
@@ -150,6 +159,71 @@ TASK: balance helpers and a temporary visual test.
    2026-11-15 Electricity bill expense 9200
    Compute calculateTotals on them and display: the balance with formatMoney, the total income, the total expenses, and one line "Expected: 102,300 FCFA" followed by "✅" if the balance is exactly 102300, otherwise "❌". Also display the names in newest-first order using sortNewestFirst (the first one shown must be "Electricity bill"). Use the theme for all styles. Plain text inside this temporary section is allowed. Do not change the rest of the screen.
 
-Create or change only src/utils/balance.ts and src/app/index.tsx.)
+Create or change only src/utils/balance.ts and src/app/index.tsx.
+```
 **What it changed:** Created src/utils/balance.ts (calculateTotals, sortNewestFirst, filterByUser) and added a temporary balance test card to src/app/index.tsx using the five example transactions from the brief.
-**Problems / fixes:** The model's written summary said expenses were 77,700 in one place and 87,700 in another. I checked the arithmetic (60,000 + 18,500 + 9,200 = 87,700) and the browser: the balance is exactly 102,300 FCFA. Lesson: verify the screen, not only the AI's description.
+**Problems / fixes:** The model's written summary said total expenses were 77,700 in one place and 87,700 in another. I checked the arithmetic (60,000 + 18,500 + 9,200 = 87,700) and the browser: the balance is exactly 102,300 FCFA with a green tick. Lesson: verify the screen, not only the AI's description.
+
+## Prompt 3A: Storage and crypto helpers
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: local storage helpers and crypto helpers. No screens. The packages @react-native-async-storage/async-storage and expo-crypto are already installed.
+
+1. Create src/storage/storage.ts:
+   - export const STORAGE_KEYS = { users: "pft:users", resetCodes: "pft:resetCodes", reports: "pft:reports", session: "pft:session" } as const
+   - readJSON<T>(key: string, fallback: T): Promise<T>. Reads AsyncStorage, parses JSON. If the key is missing, or reading or parsing fails for any reason, return the fallback. It must NEVER throw.
+   - writeJSON(key: string, value: unknown): Promise<boolean>. Saves JSON. Returns true on success and false on any failure. It must NEVER throw.
+   - removeKey(key: string): Promise<void>. Never throws.
+   Use try/catch and short comments.
+
+2. Create src/utils/crypto.ts using expo-crypto:
+   - generateId(): string. Use Crypto.randomUUID().
+   - generateSalt(): string. 16 random bytes from Crypto.getRandomBytes(16), converted to a lowercase hex string by hand (32 characters).
+   - hashPassword(password: string, salt: string): Promise<string>. Returns Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, salt + password) (hex output).
+   - generateResetCode(): string. A 6-digit numeric code, left-padded with zeros. Build it from Crypto.getRandomBytes(4) (combine the 4 bytes into one unsigned number, then take it modulo 1000000). Do NOT use Math.random.
+
+Create only these two files.
+```
+**What it changed:** Created src/storage/storage.ts (readJSON, writeJSON, removeKey and the storage keys) and src/utils/crypto.ts (generateId, generateSalt, hashPassword, generateResetCode).
+**Problems / fixes:** The model checked the Expo Crypto API names against the docs. A search for Math.random only matched two comments, not real code. Fixed a typo in a comment. Hashing needs a secure origin on web, so the app must be tested on localhost.
+
+## Prompt 3B: Accounts service
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts, src/storage/storage.ts, src/utils/crypto.ts, src/utils/validation.ts, src/strings/en.ts
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: the accounts service. No screens.
+
+1. In src/types/models.ts ADD (keep everything already there):
+   - export type ServiceResult<T> = { ok: true; data: T } | { ok: false; error: string }
+   - export interface SessionUser { id: string; name: string; email: string }
+   - export interface ResetCode { email: string; code: string; expiresAt: number }
+
+2. In src/strings/en.ts add these keys to the existing `errors` group (keep all existing keys):
+   duplicateEmail: "An account with this email already exists. Try logging in."
+   wrongCredentials: "Wrong email or password. Please try again."
+   emailNotFound: "We couldn't find an account with that email. Check the spelling or register."
+   codeInvalid: "That code is wrong. Check it and try again."
+   codeExpired: "That code has expired. Please request a new one."
+   saveFailed: "Something went wrong saving your data. Please try again."
+
+3. Create src/storage/auth.ts with these exports. Every function returns a ServiceResult and must never throw (wrap in try/catch and return saveFailed on unexpected errors). Always compare emails after normalizeEmail (from "@/utils/validation"). Read and write through STORAGE_KEYS and readJSON/writeJSON. Check that writeJSON returned true, otherwise return saveFailed.
+   - export const RESET_CODE_MINUTES = 10
+   - registerUser(input: { name: string; email: string; password: string }): ServiceResult<SessionUser>. If the email already exists return duplicateEmail. Otherwise create a User (id from generateId, a new salt, passwordHash from hashPassword, createdAt Date.now(), name trimmed, email normalized), save it, and return the SessionUser (id, name, email only: never the hash).
+   - loginUser(email: string, password: string): ServiceResult<SessionUser>. If the user is missing OR the hash does not match, return the SAME error: wrongCredentials (never reveal which part was wrong).
+   - requestPasswordReset(email: string): ServiceResult<{ code: string; expiresAt: number }>. If no user has that email return emailNotFound. Otherwise create a code with generateResetCode, expiresAt = Date.now() + RESET_CODE_MINUTES * 60 * 1000, remove any older reset code for that email, save, and return it.
+   - resetPassword(email: string, code: string, newPassword: string): ServiceResult<true>. Find the reset record for that email. If none, or the code (trimmed) does not match, return codeInvalid. If Date.now() is past expiresAt return codeExpired. Otherwise create a NEW salt and hash for the new password, update the user, DELETE the reset record (a code works only once), and return ok. If the email has no user return emailNotFound.
+   - Session helpers: saveSession(user: SessionUser, remember: boolean): Promise<void>; loadSession(): Promise<SessionUser | null>; clearSession(): Promise<void>. Keep a module-level variable `memorySession`. saveSession always sets memorySession; only when remember is true it also writes STORAGE_KEYS.session. loadSession returns memorySession if set, otherwise reads the stored session, and in both cases returns null if that user no longer exists in the users list. clearSession clears memorySession and removes the stored key.
+
+Create or change only src/types/models.ts, src/strings/en.ts and src/storage/auth.ts.
+```
+**What it changed:** (fill in after the model finishes)
+**Problems / fixes:** (fill in after checks)
