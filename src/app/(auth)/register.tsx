@@ -6,9 +6,9 @@
 
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import { Banner, Button, PasswordField, TextField } from "@/components";
+import { AuthScreen, Banner, Button, Icon, PasswordField, TextField } from "@/components";
 import { registerUser } from "@/storage/auth";
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
@@ -98,131 +98,82 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      // a tap on a link works even while the keyboard is open
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* the page header */}
-      <View style={styles.header}>
-        <Text style={styles.appName}>{strings.screens.appName}</Text>
-        {/* a short gold rule under the title */}
-        <View style={styles.rule} />
-        <Text style={styles.subtitle}>{strings.auth.registerSubtitle}</Text>
-      </View>
-
-      {/* the form */}
-      <View style={styles.form}>
-        <TextField
-          label={strings.auth.nameLabel}
-          value={name}
-          onChangeText={handleNameChange}
-          error={nameError}
-          autoCapitalize="words"
-          autoComplete="name"
-          returnKeyType="next"
-        />
-
-        <TextField
-          label={strings.auth.emailLabel}
-          value={email}
-          onChangeText={handleEmailChange}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          returnKeyType="next"
-        />
-
-        <PasswordField
-          label={strings.auth.passwordLabel}
-          value={password}
-          onChangeText={handlePasswordChange}
-          error={passwordError}
-          helper={strings.auth.passwordHelper}
-          autoComplete="new-password"
-          returnKeyType="next"
-        />
-
-        <PasswordField
-          label={strings.auth.confirmLabel}
-          value={confirm}
-          onChangeText={handleConfirmChange}
-          error={confirmError}
-          autoComplete="new-password"
-          returnKeyType="done"
-          // pressing "done" on the keyboard sends the form
-          onSubmitEditing={handleSubmit}
-        />
-
-        {/* the answer from the service, for example a duplicate email */}
-        <Banner message={serviceError} tone="error" />
-
-        <Button
-          title={working ? strings.auth.creating : strings.screens.register}
-          onPress={handleSubmit}
-          loading={working}
-        />
-
-        {/* someone who already has an account goes to the login screen */}
+    <AuthScreen
+      title={strings.screens.register}
+      subtitle={strings.auth.registerSubtitle}
+      footer={
         <View style={styles.footerRow}>
           <Text style={styles.footerText}>{strings.auth.haveAccount}</Text>
           <Link href="/login" style={styles.link}>
             {strings.screens.login}
           </Link>
         </View>
-      </View>
-    </ScrollView>
+      }
+    >
+      <TextField
+        label={strings.auth.nameLabel}
+        value={name}
+        onChangeText={handleNameChange}
+        error={nameError}
+        autoCapitalize="words"
+        autoComplete="name"
+        returnKeyType="next"
+        leftElement={<Icon name="person" size={20} color={colors.inkSoft} />}
+      />
+
+      <TextField
+        label={strings.auth.emailLabel}
+        value={email}
+        onChangeText={handleEmailChange}
+        error={emailError}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        returnKeyType="next"
+        leftElement={<Icon name="mail" size={20} color={colors.inkSoft} />}
+      />
+
+      <PasswordField
+        label={strings.auth.passwordLabel}
+        value={password}
+        onChangeText={handlePasswordChange}
+        error={passwordError}
+        helper={strings.auth.passwordHelper}
+        autoComplete="new-password"
+        returnKeyType="next"
+        leftElement={<Icon name="lock" size={20} color={colors.inkSoft} />}
+      />
+
+      <PasswordField
+        label={strings.auth.confirmLabel}
+        value={confirm}
+        onChangeText={handleConfirmChange}
+        error={confirmError}
+        autoComplete="new-password"
+        returnKeyType="done"
+        // pressing "done" on the keyboard sends the form
+        onSubmitEditing={handleSubmit}
+        leftElement={<Icon name="lock" size={20} color={colors.inkSoft} />}
+      />
+
+      {/* the answer from the service, for example a duplicate email */}
+      <Banner message={serviceError} tone="error" />
+
+      <Button
+        title={working ? strings.auth.creating : strings.screens.register}
+        onPress={handleSubmit}
+        loading={working}
+      />
+    </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  // the page itself
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  // the column of content: centred when the screen is taller than the form
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.lg,
-    // never wider than the phone frame, even on a desktop
-    width: "100%",
-    maxWidth: layout.maxContentWidth,
-    alignSelf: "center",
-  },
-
-  // --- header ---
-  header: {
-    gap: spacing.sm,
-  },
-  appName: {
-    ...typography.displayL,
-    color: colors.ink,
-  },
-  rule: {
-    height: 3,
-    width: spacing.huge,
-    backgroundColor: colors.gold,
-    borderRadius: radius.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.inkSoft,
-  },
-
-  // fields stacked with a small gap
-  form: {
-    gap: spacing.lg,
-  },
-
   // --- link under the button ---
   footerRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     flexWrap: "wrap",
     gap: spacing.xs,
   },

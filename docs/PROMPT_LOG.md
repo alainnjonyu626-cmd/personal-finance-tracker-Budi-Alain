@@ -544,3 +544,35 @@ Create or change only: src/strings/en.ts, src/components/TextField.tsx, src/comp
 **What it changed:** Redesigned the Add and Edit report screens: back button and subtitle, Income/Expense cards with icons, a large amount field with FCFA, Today and Yesterday date chips, and Save and Cancel pinned at the bottom. TextField gained two optional props (leftElement and size).
 
 **Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the five named files; tsc and both searches were clean. I rechecked Login, Register and Forgot password to make sure the shared TextField still looked the same. (Write what you saw.)
+
+
+## Prompt 7C: Modern Login and Register screens (AuthScreen, autofill fix)
+**Date:** 19 Nov 2026
+**Tool / model:** GitHub Copilot (Copilot Fusion)
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/theme/colors.ts, src/theme/spacing.ts, src/theme/typography.ts, src/theme/index.ts, src/strings/en.ts, src/components/index.ts, src/components/TextField.tsx, src/components/PasswordField.tsx, src/components/Button.tsx, src/components/Banner.tsx, src/components/Icon.tsx, src/app/(auth)/login.tsx, src/app/(auth)/register.tsx
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
+
+TASK: redesign the Login and Register screens in the "Modern Ledger" style already used by the dashboard and the report forms (forest green, warm cream, gold accents, icons), and fix the browser autofill colour. Change ONLY layout and styling. Keep every validation rule, error message, service call, route param (registered, reset), "Remember me" behaviour and navigation exactly as they are now. Add no features and no new strings.
+
+1. Create src/components/AuthScreen.tsx (named export AuthScreen) and export it from src/components/index.ts. Props: title: string; subtitle: string; children: ReactNode; footer?: ReactNode.
+   - Root: a View with flex 1 and colors.paper, containing a ScrollView (flex 1, keyboardShouldPersistTaps="handled", contentContainerStyle flexGrow 1).
+   - Hero (top of the scroll content): a View with background colors.forest, borderBottomLeftRadius and borderBottomRightRadius radius.xl, paddingHorizontal spacing.xl, paddingTop spacing.huge, paddingBottom spacing.xxl, overflow hidden. Gold coin motif: the same two decorative circles used in the dashboard hero card in src/app/(app)/reports.tsx (a 160x160 filled circle colors.gold opacity 0.18 at top -40 right -40, and a 100x100 circle with a 2px colors.gold border, opacity 0.35, transparent background, at top -10 right -10), both pointerEvents="none" and hidden from accessibility. Content: a 56x56 circle (radius.pill, background colors.gold) holding Icon wallet size 28 in colors.forest; then (marginTop spacing.lg) strings.screens.appName in typography.label and colors.forestSoft; then (marginTop spacing.xs) the title in typography.displayL and colors.paper with accessibilityRole="header"; then (marginTop spacing.sm) the subtitle in typography.body and colors.forestSoft.
+   - Body (below the hero): a View with paddingHorizontal spacing.xl, paddingTop spacing.xl, paddingBottom spacing.xxl and gap spacing.lg, containing children and then the footer (if any, with marginTop spacing.sm).
+   - ENTRANCE: the body fades in (opacity 0 to 1) and slides up (translateY 12 to 0) once on mount over 400 ms using Animated.timing with useNativeDriver set to Platform.OS !== "web". If AccessibilityInfo.isReduceMotionEnabled() resolves true, skip the animation. Nothing else animates.
+
+2. src/components/TextField.tsx: fix the browser autofill colour on web only. At module level add a function that runs once when the module loads: if Platform.OS === "web" and the browser document exists, and document.getElementById("pft-autofill-fix") is null, create a <style> element with id "pft-autofill-fix" and append it to document.head. Its CSS has one rule for input:-webkit-autofill, input:-webkit-autofill:hover and input:-webkit-autofill:focus with: -webkit-box-shadow: 0 0 0 1000px <colors.paperDeep> inset !important; -webkit-text-fill-color: <colors.ink> !important; caret-color: <colors.ink> !important; transition: background-color 9999s ease-in-out 0s. Build the CSS text from the theme colors (no hex literals). Nothing else in TextField changes. If TypeScript does not know `document`, STOP and tell me instead of using casts.
+
+3. src/components/PasswordField.tsx: make sure the optional leftElement and size props of TextField are forwarded through PasswordField. Change nothing else.
+
+4. src/app/(auth)/login.tsx: remove the old page wrapper, ScrollView and header, and render the same form inside <AuthScreen title={strings.screens.login} subtitle={strings.auth.loginSubtitle} footer={...}>. Inside, keep in this order: the success Banner for the `registered` / `reset` route params, the email TextField with leftElement Icon mail (size 20, colors.inkSoft), the PasswordField with leftElement Icon lock, the Remember me row, the error Banner and the primary Button, all with their current props and behaviour. The footer holds, centred: the row with strings.auth.noAccount and the Link to "/register", and below it the "Forgot password?" Link. Keep the current Link styles (typography.bodyStrong, colors.forest, minHeight layout.minTouchTarget).
+
+5. src/app/(auth)/register.tsx: the same treatment with title strings.screens.register and subtitle strings.auth.registerSubtitle. Keep the full name field (leftElement Icon person), email (Icon mail), password with its helper (Icon lock) and confirm password (Icon lock), the error Banner and the primary Button with their current props and behaviour. The footer holds, centred, the row with strings.auth.haveAccount and the Link to "/login".
+
+All colours, fonts and sizes come from the theme (the exact pixel sizes above are allowed). No hard-coded hex values. Every tappable element is at least 48 high.
+
+Create or change only: src/components/AuthScreen.tsx, src/components/index.ts, src/components/TextField.tsx, src/components/PasswordField.tsx, src/app/(auth)/login.tsx and src/app/(auth)/register.tsx.
+```
+**What it changed:** Created the shared AuthScreen component (forest hero panel with a gold coin motif and wallet badge, one fade-up on load) and redesigned Login and Register with icons inside the fields. TextField gained a web-only fix for the browser autofill colour, and PasswordField now forwards leftElement and size.
+**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the six named files; tsc and both searches were clean. I tested the autofill colour after saving a login, and all validation, the registered banner and Remember me still work. (Write anything that went wrong.)

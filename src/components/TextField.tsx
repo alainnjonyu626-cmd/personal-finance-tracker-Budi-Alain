@@ -21,6 +21,32 @@ import {
 
 import { colors, layout, radius, spacing, typography } from "@/theme";
 
+function installAutofillFix() {
+  if (
+    Platform.OS !== "web" ||
+    typeof document === "undefined" ||
+    document.getElementById("pft-autofill-fix") !== null
+  ) {
+    return;
+  }
+
+  const style = document.createElement("style");
+  style.id = "pft-autofill-fix";
+  style.textContent = `
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px ${colors.paperDeep} inset !important;
+      -webkit-text-fill-color: ${colors.ink} !important;
+      caret-color: ${colors.ink} !important;
+      transition: background-color 9999s ease-in-out 0s;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+installAutofillFix();
+
 // The list of props a TextField accepts. PasswordField reuses it.
 export interface TextFieldProps {
   // the little uppercase name above the box

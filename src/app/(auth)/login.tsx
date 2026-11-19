@@ -6,9 +6,9 @@
 
 import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 
-import { Banner, Button, PasswordField, TextField } from "@/components";
+import { AuthScreen, Banner, Button, Icon, PasswordField, TextField } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { loginUser } from "@/storage/auth";
 import { strings } from "@/strings/en";
@@ -86,20 +86,23 @@ export default function LoginScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      // a tap on a link works even while the keyboard is open
-      keyboardShouldPersistTaps="handled"
+    <AuthScreen
+      title={strings.screens.login}
+      subtitle={strings.auth.loginSubtitle}
+      footer={
+        <View style={styles.footer}>
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>{strings.auth.noAccount}</Text>
+            <Link href="/register" style={styles.link}>
+              {strings.screens.register}
+            </Link>
+          </View>
+          <Link href="/forgot-password" style={styles.link}>
+            {strings.auth.forgotLink}
+          </Link>
+        </View>
+      }
     >
-      {/* the page header */}
-      <View style={styles.header}>
-        <Text style={styles.appName}>{strings.screens.appName}</Text>
-        {/* a short gold rule under the title */}
-        <View style={styles.rule} />
-        <Text style={styles.subtitle}>{strings.auth.loginSubtitle}</Text>
-      </View>
-
       {/* shown once, right after the account was created */}
       {justRegistered ? (
         <Banner message={strings.auth.accountCreated} tone="success" />
@@ -107,111 +110,60 @@ export default function LoginScreen() {
         <Banner message={strings.auth.passwordUpdated} tone="success" />
       ) : null}
 
-      {/* the form */}
-      <View style={styles.form}>
-        <TextField
-          label={strings.auth.emailLabel}
-          value={email}
-          onChangeText={handleEmailChange}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          returnKeyType="next"
-        />
+      <TextField
+        label={strings.auth.emailLabel}
+        value={email}
+        onChangeText={handleEmailChange}
+        error={emailError}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoComplete="email"
+        returnKeyType="next"
+        leftElement={<Icon name="mail" size={20} color={colors.inkSoft} />}
+      />
 
-        <PasswordField
-          label={strings.auth.passwordLabel}
-          value={password}
-          onChangeText={handlePasswordChange}
-          error={passwordError}
-          autoComplete="current-password"
-          returnKeyType="done"
-          // pressing "done" on the keyboard sends the form
-          onSubmitEditing={handleSubmit}
-        />
+      <PasswordField
+        label={strings.auth.passwordLabel}
+        value={password}
+        onChangeText={handlePasswordChange}
+        error={passwordError}
+        autoComplete="current-password"
+        returnKeyType="done"
+        // pressing "done" on the keyboard sends the form
+        onSubmitEditing={handleSubmit}
+        leftElement={<Icon name="lock" size={20} color={colors.inkSoft} />}
+      />
 
-        {/* the "Remember me" checkbox */}
-        <Pressable
-          onPress={() => setRemember(!remember)}
-          style={styles.checkboxRow}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: remember }}
-          accessibilityLabel={strings.auth.rememberMe}
-        >
-          <View style={[styles.box, remember && styles.boxChecked]}>
-            {/* the tick only appears when the box is checked */}
-            {remember ? <Text style={styles.tick}>✓</Text> : null}
-          </View>
-          <Text style={styles.checkboxLabel}>{strings.auth.rememberMe}</Text>
-        </Pressable>
-
-        {/* the answer from the service, for example "Wrong email or password" */}
-        <Banner message={serviceError} tone="error" />
-
-        <Button
-          title={working ? strings.auth.loggingIn : strings.screens.login}
-          onPress={handleSubmit}
-          loading={working}
-        />
-
-        {/* someone without an account goes to the register screen */}
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>{strings.auth.noAccount}</Text>
-          <Link href="/register" style={styles.link}>
-            {strings.screens.register}
-          </Link>
+      {/* the "Remember me" checkbox */}
+      <Pressable
+        onPress={() => setRemember(!remember)}
+        style={styles.checkboxRow}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: remember }}
+        accessibilityLabel={strings.auth.rememberMe}
+      >
+        <View style={[styles.box, remember && styles.boxChecked]}>
+          {/* the tick only appears when the box is checked */}
+          {remember ? <Text style={styles.tick}>✓</Text> : null}
         </View>
+        <Text style={styles.checkboxLabel}>{strings.auth.rememberMe}</Text>
+      </Pressable>
 
-        {/* a quiet link for a forgotten password */}
-        <Link href="/forgot-password" style={styles.link}>
-          {strings.auth.forgotLink}
-        </Link>
-      </View>
-    </ScrollView>
+      {/* the answer from the service, for example "Wrong email or password" */}
+      <Banner message={serviceError} tone="error" />
+
+      <Button
+        title={working ? strings.auth.loggingIn : strings.screens.login}
+        onPress={handleSubmit}
+        loading={working}
+      />
+    </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  // the page itself
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-  },
-  // the column of content: centred when the screen is taller than the form
-  content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: spacing.xl,
-    gap: spacing.lg,
-    // never wider than the phone frame, even on a desktop
-    width: "100%",
-    maxWidth: layout.maxContentWidth,
-    alignSelf: "center",
-  },
-
-  // --- header ---
-  header: {
-    gap: spacing.sm,
-  },
-  appName: {
-    ...typography.displayL,
-    color: colors.ink,
-  },
-  rule: {
-    height: 3,
-    width: spacing.huge,
-    backgroundColor: colors.gold,
-    borderRadius: radius.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    color: colors.inkSoft,
-  },
-
-  // fields stacked with a small gap
-  form: {
-    gap: spacing.lg,
+  footer: {
+    alignItems: "center",
   },
 
   // --- "Remember me" ---

@@ -19,3 +19,6 @@ export { ReportForm } from "./ReportForm";
 
 export { Icon } from "./Icon";
 export type { IconName } from "./Icon";
+
+export { AuthScreen } from "./AuthScreen";
+export type { AuthScreenProps } from "./AuthScreen";
