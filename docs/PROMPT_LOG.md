@@ -192,38 +192,61 @@ Create only these two files.
 **What it changed:** Created src/storage/storage.ts (readJSON, writeJSON, removeKey and the storage keys) and src/utils/crypto.ts (generateId, generateSalt, hashPassword, generateResetCode).
 **Problems / fixes:** The model checked the Expo Crypto API names against the docs. A search for Math.random only matched two comments, not real code. Fixed a typo in a comment. Hashing needs a secure origin on web, so the app must be tested on localhost.
 
-## Prompt 3B: Accounts service
+
+## Prompt 3B-test: Temporary accounts self-test
 **Date:** 19 Nov 2026
 **Tool / model:** CodeGPT, DeepSeek V4.1 Flash
-**Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts, src/storage/storage.ts, src/utils/crypto.ts, src/utils/validation.ts, src/strings/en.ts
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/storage/auth.ts, src/storage/storage.ts, src/app/index.tsx
 **Prompt:**
 ```
 Follow the rules in the attached docs/PROMPT_HEADER.md.
 
-TASK: the accounts service. No screens.
+TASK: a temporary self-test for the accounts service, shown on the design-check screen. Change only src/app/index.tsx.
 
-1. In src/types/models.ts ADD (keep everything already there):
-   - export type ServiceResult<T> = { ok: true; data: T } | { ok: false; error: string }
-   - export interface SessionUser { id: string; name: string; email: string }
-   - export interface ResetCode { email: string; code: string; expiresAt: number }
+Add a clearly commented temporary section "Accounts self-test (temporary)" with a button "Run accounts test". When pressed it runs these steps in order using the functions from "@/storage/auth", with the test email "selftest@example.com" and password "secret123", and shows each step on its own line with ✅ or ❌ plus a short label (plain English text is allowed in this temporary section). At the very start of the run, remove the keys STORAGE_KEYS.users, STORAGE_KEYS.resetCodes and STORAGE_KEYS.session (use removeKey from "@/storage/storage") so every run starts clean.
 
-2. In src/strings/en.ts add these keys to the existing `errors` group (keep all existing keys):
-   duplicateEmail: "An account with this email already exists. Try logging in."
-   wrongCredentials: "Wrong email or password. Please try again."
-   emailNotFound: "We couldn't find an account with that email. Check the spelling or register."
-   codeInvalid: "That code is wrong. Check it and try again."
-   codeExpired: "That code has expired. Please request a new one."
-   saveFailed: "Something went wrong saving your data. Please try again."
+Steps and expected results:
+1. registerUser(name "Test User", email "selftest@example.com", password "secret123") returns ok.
+2. registerUser again with email "SelfTest@Example.com" (different capitals) returns ok false (duplicate).
+3. loginUser("selftest@example.com", "secret123") returns ok.
+4. loginUser("selftest@example.com", "wrongpass") returns ok false with the wrongCredentials message.
+5. loginUser("nobody@example.com", "secret123") returns ok false with the SAME wrongCredentials message.
+6. requestPasswordReset("nobody@example.com") returns ok false (emailNotFound).
+7. requestPasswordReset("selftest@example.com") returns ok with a 6-digit code (check the code is exactly 6 digits). Keep the code.
+8. resetPassword(email, "000000", "newpass456") returns ok false (wrong code; skip this step's real run if the real code happens to be "000000").
+9. resetPassword(email, the real code, "newpass456") returns ok.
+10. loginUser(email, "secret123") (the OLD password) returns ok false.
+11. loginUser(email, "newpass456") returns ok.
+12. resetPassword(email, the same real code again, "another789") returns ok false (a code works only once).
+13. Check that the stored users list (readJSON on STORAGE_KEYS.users) contains no field holding the text "newpass456" or "secret123" anywhere (convert it to a string with JSON.stringify and check it does not include either word).
 
-3. Create src/storage/auth.ts with these exports. Every function returns a ServiceResult and must never throw (wrap in try/catch and return saveFailed on unexpected errors). Always compare emails after normalizeEmail (from "@/utils/validation"). Read and write through STORAGE_KEYS and readJSON/writeJSON. Check that writeJSON returned true, otherwise return saveFailed.
-   - export const RESET_CODE_MINUTES = 10
-   - registerUser(input: { name: string; email: string; password: string }): ServiceResult<SessionUser>. If the email already exists return duplicateEmail. Otherwise create a User (id from generateId, a new salt, passwordHash from hashPassword, createdAt Date.now(), name trimmed, email normalized), save it, and return the SessionUser (id, name, email only: never the hash).
-   - loginUser(email: string, password: string): ServiceResult<SessionUser>. If the user is missing OR the hash does not match, return the SAME error: wrongCredentials (never reveal which part was wrong).
-   - requestPasswordReset(email: string): ServiceResult<{ code: string; expiresAt: number }>. If no user has that email return emailNotFound. Otherwise create a code with generateResetCode, expiresAt = Date.now() + RESET_CODE_MINUTES * 60 * 1000, remove any older reset code for that email, save, and return it.
-   - resetPassword(email: string, code: string, newPassword: string): ServiceResult<true>. Find the reset record for that email. If none, or the code (trimmed) does not match, return codeInvalid. If Date.now() is past expiresAt return codeExpired. Otherwise create a NEW salt and hash for the new password, update the user, DELETE the reset record (a code works only once), and return ok. If the email has no user return emailNotFound.
-   - Session helpers: saveSession(user: SessionUser, remember: boolean): Promise<void>; loadSession(): Promise<SessionUser | null>; clearSession(): Promise<void>. Keep a module-level variable `memorySession`. saveSession always sets memorySession; only when remember is true it also writes STORAGE_KEYS.session. loadSession returns memorySession if set, otherwise reads the stored session, and in both cases returns null if that user no longer exists in the users list. clearSession clears memorySession and removes the stored key.
+At the end show "All steps passed ✅" or "Some steps failed ❌". Do not change the other parts of the screen. Use theme styles only.
+```
+**What it changed:** Edited src/app/index.tsx: added an AccountsSelfTest component and two small button styles under the balance test. It clears the users, reset codes and session keys, then runs the 13 steps and shows a tick or cross on each.
+**Problems / fixes:** The model built this together with Prompt 3B. Its own headless-browser run showed all steps passing; my own run in my browser: (write what you saw, for example "13 ticks, All steps passed"). The heading shows in capitals because the theme label style is uppercase. This card is temporary and is deleted when the real screens exist.
 
-Create or change only src/types/models.ts, src/strings/en.ts and src/storage/auth.ts.
+## Prompt 3C: Reports service
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/types/models.ts, src/storage/storage.ts, src/utils/crypto.ts, src/utils/validation.ts, src/utils/dates.ts, src/utils/balance.ts, src/strings/en.ts
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: the reports service. No screens.
+
+Create src/storage/reports.ts. Reports are stored as ONE array under STORAGE_KEYS.reports. Every function never throws (use try/catch) and returns saveFailed (from strings.errors) on unexpected errors. Check that writeJSON returned true. Use the Report, TransactionType and ServiceResult types from "@/types/models".
+
+export type ReportInput = { name: string; type: TransactionType; amount: number; date: string }
+
+Exports:
+- getUserReports(userId: string): Promise<Report[]>. Returns only that user's reports, newest first (use filterByUser and sortNewestFirst from "@/utils/balance"). On any error return an empty array.
+- getReport(userId: string, reportId: string): Promise<Report | null>. Returns null unless the report exists AND belongs to userId.
+- addReport(userId: string, input: ReportInput): Promise<ServiceResult<Report>>. First check the input again: name (trimmed) not empty, type is "income" or "expense", amount is a finite number greater than 0, date passes isValidISODate. Return the matching message from strings.errors if something is wrong. Then round the amount to 2 decimals, trim the name, create the report (id from generateId, userId, createdAt Date.now()), save, and return it.
+- updateReport(userId: string, reportId: string, input: ReportInput): Promise<ServiceResult<Report>>. Same checks. Only update a report that belongs to userId, keeping its id, userId and createdAt. If not found or not owned, return saveFailed.
+- deleteReport(userId: string, reportId: string): Promise<ServiceResult<true>>. Only deletes a report that belongs to userId.
+
+Create only src/storage/reports.ts.
 ```
 **What it changed:** (fill in after the model finishes)
 **Problems / fixes:** (fill in after checks)

@@ -39,3 +39,31 @@ export interface User {
   // When the account was created, in milliseconds (Date.now()).
   createdAt: number;
 }
+
+/**
+ * The answer of every storage service (accounts, reports...).
+ * Either it worked and carries `data`, or it failed and carries a readable `error`.
+ */
+export type ServiceResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+/** The safe part of a user we keep in memory: never the password hash or the salt. */
+export interface SessionUser {
+  // Id of the logged-in user.
+  id: string;
+  // Name shown on screen, e.g. "Budi Alain".
+  name: string;
+  // Email, always lowercase.
+  email: string;
+}
+
+/** One temporary code that lets a user choose a new password. */
+export interface ResetCode {
+  // Email of the account this code belongs to (lowercase).
+  email: string;
+  // The 6-digit code shown on screen, e.g. "042917".
+  code: string;
+  // When the code stops working, in milliseconds (Date.now()).
+  expiresAt: number;
+}

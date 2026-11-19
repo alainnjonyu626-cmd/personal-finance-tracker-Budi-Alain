@@ -7,9 +7,16 @@ import {
   View,
 } from "react-native";
 
+import {
+  loginUser,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+} from "@/storage/auth";
+import { STORAGE_KEYS, readJSON, removeKey } from "@/storage/storage";
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
-import type { Report } from "@/types/models";
+import type { Report, User } from "@/types/models";
 import { calculateTotals, sortNewestFirst } from "@/utils/balance";
 import { formatMoney } from "@/utils/money";
 
@@ -145,6 +152,14 @@ export default function DesignCheck() {
           see the numbers on screen. Delete this block later.
          ================================================================= */}
       <BalanceTest />
+
+      {/* =================================================================
+          Accounts self-test (temporary)
+          Runs the accounts service step by step and prints one line per
+          step, so we can see on screen that register, login and password
+          reset really work. Delete this block later.
+         ================================================================= */}
+      <AccountsSelfTest />
     </ScrollView>
   );
 }
@@ -181,6 +196,191 @@ function BalanceTest() {
           {report.date} · {report.name}
         </Text>
       ))}
+    </View>
+  );
+}
+
+// ---- Accounts self-test (temporary) ----
+// The email and password used by every run of the test.
+const TEST_EMAIL = "selftest@example.com";
+const TEST_PASSWORD = "secret123";
+
+// One line of the report: a tick or a cross, a short label, and the details.
+interface TestLine {
+  passed: boolean;
+  label: string;
+  detail: string;
+}
+
+function AccountsSelfTest() {
+  // every line printed so far, and whether the test is running right now
+  const [lines, setLines] = useState<TestLine[]>([]);
+  const [running, setRunning] = useState(false);
+  const [finished, setFinished] = useState(false);
+
+  // Run all the steps, one after the other, and print each result.
+  async function runTest() {
+    setRunning(true);
+    setFinished(false);
+
+    const results: TestLine[] = [];
+    // Add one line and show it straight away.
+    function record(step: string, passed: boolean, detail: string) {
+      const line = { passed, label: step, detail };
+      results.push(line);
+      setLines([...results]);
+    }
+
+    // Start from a clean phone: no users, no codes, no session.
+    await removeKey(STORAGE_KEYS.users);
+    await removeKey(STORAGE_KEYS.resetCodes);
+    await removeKey(STORAGE_KEYS.session);
+
+    const email = TEST_EMAIL;
+
+    // 1. A new account can be created.
+    const registered = await registerUser({
+      name: "Test User",
+      email,
+      password: TEST_PASSWORD,
+    });
+    record("1. Register new account", registered.ok, registered.ok ? registered.data.email : registered.error);
+
+    // 2. The same email with different capitals is a duplicate.
+    const duplicate = await registerUser({
+      name: "Test User",
+      email: "SelfTest@Example.com",
+      password: TEST_PASSWORD,
+    });
+    record(
+      "2. Duplicate email rejected",
+      !duplicate.ok && duplicate.error === strings.errors.duplicateEmail,
+      duplicate.ok ? "Accepted (wrong)" : duplicate.error,
+    );
+
+    // 3. The right password logs in.
+    const login = await loginUser(email, TEST_PASSWORD);
+    record("3. Login with right password", login.ok, login.ok ? login.data.name : login.error);
+
+    // 4. A wrong password is refused.
+    const badPassword = await loginUser(email, "wrongpass");
+    record(
+      "4. Wrong password refused",
+      !badPassword.ok && badPassword.error === strings.errors.wrongCredentials,
+      badPassword.ok ? "Accepted (wrong)" : badPassword.error,
+    );
+
+    // 5. An unknown email gets the SAME message as a wrong password.
+    const unknownEmail = await loginUser("nobody@example.com", TEST_PASSWORD);
+    record(
+      "5. Unknown email: same message",
+      !unknownEmail.ok && unknownEmail.error === strings.errors.wrongCredentials,
+      unknownEmail.ok ? "Accepted (wrong)" : unknownEmail.error,
+    );
+
+    // 6. A reset cannot be requested for an email that is not registered.
+    const nobodyReset = await requestPasswordReset("nobody@example.com");
+    record(
+      "6. Reset for unknown email refused",
+      !nobodyReset.ok && nobodyReset.error === strings.errors.emailNotFound,
+      nobodyReset.ok ? "Accepted (wrong)" : nobodyReset.error,
+    );
+
+    // 7. A reset code is created for a registered email. We keep it for later.
+    const resetRequest = await requestPasswordReset(email);
+    const realCode = resetRequest.ok ? resetRequest.data.code : "";
+    record(
+      "7. Reset code requested (6 digits)",
+      resetRequest.ok && /^\d{6}$/.test(realCode),
+      resetRequest.ok ? `Code: ${realCode}` : resetRequest.error,
+    );
+
+    // 8. A wrong code is refused (skipped in the rare case the real code is 000000).
+    if (realCode === "000000") {
+      record("8. Wrong code refused", true, "Skipped: the real code is 000000");
+    } else {
+      const badCode = await resetPassword(email, "000000", "newpass456");
+      record(
+        "8. Wrong code refused",
+        !badCode.ok && badCode.error === strings.errors.codeInvalid,
+        badCode.ok ? "Accepted (wrong)" : badCode.error,
+      );
+    }
+
+    // 9. The real code changes the password.
+    const reset = await resetPassword(email, realCode, "newpass456");
+    record("9. Real code changes password", reset.ok, reset.ok ? "Password changed" : reset.error);
+
+    // 10. The old password no longer works.
+    const oldPassword = await loginUser(email, TEST_PASSWORD);
+    record(
+      "10. Old password refused",
+      !oldPassword.ok,
+      oldPassword.ok ? "Accepted (wrong)" : oldPassword.error,
+    );
+
+    // 11. The new password works.
+    const newPassword = await loginUser(email, "newpass456");
+    record(
+      "11. New password works",
+      newPassword.ok,
+      newPassword.ok ? newPassword.data.email : newPassword.error,
+    );
+
+    // 12. The same code cannot be used a second time.
+    const reuse = await resetPassword(email, realCode, "another789");
+    record(
+      "12. Code works only once",
+      !reuse.ok && reuse.error === strings.errors.codeInvalid,
+      reuse.ok ? "Accepted (wrong)" : reuse.error,
+    );
+
+    // 13. No password is ever written on the phone in plain text.
+    const savedUsers = JSON.stringify(
+      await readJSON<User[]>(STORAGE_KEYS.users, []),
+    );
+    const hasPlainPassword =
+      savedUsers.includes("newpass456") || savedUsers.includes("secret123");
+    record(
+      "13. No plain password stored",
+      !hasPlainPassword,
+      hasPlainPassword ? "A password was found" : "Only hashes are saved",
+    );
+
+    setRunning(false);
+    setFinished(true);
+  }
+
+  const allPassed = lines.every((line) => line.passed);
+
+  return (
+    <View style={styles.testCard}>
+      <Text style={styles.label}>Accounts self-test (temporary)</Text>
+
+      {/* the greyed-out look is only for the duration of the run (see button styles) */}
+      <Pressable
+        onPress={runTest}
+        disabled={running}
+        style={[styles.smallButton, running && styles.smallButtonDisabled]}
+      >
+        <Text style={styles.buttonText}>
+          {running ? "Running…" : "Run accounts test"}
+        </Text>
+      </Pressable>
+
+      {/* one line per step */}
+      {lines.map((line) => (
+        <Text key={line.label} style={styles.testLine}>
+          {line.passed ? "✅" : "❌"} {line.label} — {line.detail}
+        </Text>
+      ))}
+
+      {/* the summary, once everything has run */}
+      {finished ? (
+        <Text style={styles.testLine}>
+          {allPassed ? "All steps passed ✅" : "Some steps failed ❌"}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -322,5 +522,20 @@ const styles = StyleSheet.create({
   testLine: {
     ...typography.body,
     color: colors.inkSoft,
+  },
+
+  // ---- Accounts self-test (temporary) ----
+  // a small forest button, same look as the main one
+  smallButton: {
+    minHeight: layout.minTouchTarget,
+    backgroundColor: colors.forest,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: spacing.xl,
+  },
+  // greyed out while the test is running
+  smallButtonDisabled: {
+    backgroundColor: colors.disabled,
   },
 });

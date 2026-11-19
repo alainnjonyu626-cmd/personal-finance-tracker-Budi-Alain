@@ -34,6 +34,14 @@ export const strings = {
     dateInvalid: "That date isn't valid. Use the format YYYY-MM-DD.",
     // recovering a password
     codeRequired: "Please enter the reset code.",
+    // answers that come from the accounts service (src/storage/auth.ts)
+    duplicateEmail: "An account with this email already exists. Try logging in.",
+    wrongCredentials: "Wrong email or password. Please try again.",
+    emailNotFound:
+      "We couldn't find an account with that email. Check the spelling or register.",
+    codeInvalid: "That code is wrong. Check it and try again.",
+    codeExpired: "That code has expired. Please request a new one.",
+    saveFailed: "Something went wrong saving your data. Please try again.",
   },
 } as const;
 
