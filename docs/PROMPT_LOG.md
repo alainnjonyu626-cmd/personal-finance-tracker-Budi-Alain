@@ -51,15 +51,79 @@ WHEN YOU FINISH: (a) list every file you created or changed, (b) explain each fi
 **What it changed:** Created src/theme/colors.ts, typography.ts, spacing.ts, index.ts and src/strings/en.ts. Edited src/app/_layout.tsx (fonts, splash screen, phone frame) and src/app/index.tsx (design-check screen).
 **Problems / fixes:** The AI credits ran out right after the files were written, so I switched to the free DeepSeek V4.1 Flash model for the next prompts. After reviewing the code I found a `fontWeight` line on every text style that duplicated the weight already in the font name (for example Fraunces_700Bold) and removed those lines. Checked with `npx tsc --noEmit` (clean), searches for stray hex colors, pure black/white and `any` (none found), and in the browser.
 
----
+-## Prompt 2A: Data types, money format and date helpers
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts
+**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
 
-## How to add the next entry
-(Copy this block to the bottom of the file for every new prompt, then fill it in.)
+TASK: data types and formatting helpers. No screens.
 
-## Prompt N: [short title]
-**Date:**
-**Tool / model:**
-**Attached files:**
-**Prompt:** (paste exactly what was sent)
-**What it changed:**
-**Problems / fixes:**
+1. Create src/types/models.ts exporting:
+   - type TransactionType = "income" | "expense"
+   - interface Report { id: string; userId: string; name: string; type: TransactionType; amount: number; date: string (format "YYYY-MM-DD"); createdAt: number (milliseconds timestamp) }
+   - interface User { id: string; name: string; email: string (always stored lowercase); passwordHash: string; salt: string; createdAt: number }
+   Add a short comment on each field.
+
+2. Create src/utils/money.ts exporting:
+   - formatAmount(value: number): string. Comma thousands separator; whole numbers show no decimals; other numbers show up to 2 decimals; negative numbers start with the real minus sign "−" (U+2212). Do NOT use Intl or toLocaleString: write it by hand so it is identical on every device.
+   - formatMoney(value: number): string. Same as formatAmount plus a space and strings.common.currency.
+   - signedAmount(type: TransactionType, amount: number): string. Income gives "+ " plus formatAmount; expense gives "− " plus formatAmount.
+   Required results: formatAmount(102300) = "102,300"; formatAmount(18500) = "18,500"; formatAmount(0) = "0"; formatAmount(1234.5) = "1,234.5"; formatAmount(-5000) = "−5,000"; formatMoney(102300) = "102,300 FCFA"; signedAmount("income", 150000) = "+ 150,000"; signedAmount("expense", 60000) = "− 60,000".
+
+3. Create src/utils/dates.ts exporting:
+   - toISODate(date: Date): string. Build "YYYY-MM-DD" from the LOCAL year, month and day. Do NOT use toISOString (it uses UTC and can give the wrong day).
+   - todayISO(): string
+   - isValidISODate(value: string): boolean. Must match YYYY-MM-DD exactly AND be a real calendar date.
+   - formatDisplayDate(value: string): string. "2026-11-01" becomes "01 Nov 2026". Use a hand-written list of month names Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec. No Intl.
+   Required results: toISODate(new Date(2026, 10, 1)) = "2026-11-01"; isValidISODate("2026-02-30") = false; isValidISODate("2026-11-1") = false; isValidISODate("2026-11-15") = true; formatDisplayDate("2026-11-01") = "01 Nov 2026".
+
+Create or change only these three files.)
+**What it changed:** Created src/types/models.ts, src/utils/money.ts and src/utils/dates.ts.
+**Problems / fixes:** The model ran `npx expo lint`, which tried to install ESLint and edited package.json. It reverted the change itself; I confirmed with `git diff` that package.json is unchanged. I added a rule to the prompt header forbidding lint and install commands. toISOString is avoided on purpose, because it uses UTC and Douala is UTC+1, so near midnight it could give the wrong day.
+
+## Prompt 2B: Validation helpers and error messages
+**Date:** 19 Nov 2026
+**Tool / model:** CodeGPT, DeepSeek V4.1 Flash
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/strings/en.ts, src/utils/money.ts, src/utils/dates.ts
+**Prompt:** (Follow the rules in the attached docs/PROMPT_HEADER.md.
+
+TASK: validation helpers and error messages. No screens.
+
+1. In src/strings/en.ts add a group `errors` with exactly these keys and texts:
+   nameRequired: "Please enter your name."
+   emailRequired: "Please enter your email."
+   emailInvalid: "That email doesn't look right. Example: name@example.com"
+   passwordRequired: "Please enter a password."
+   passwordTooShort: "Your password must have at least 6 characters."
+   confirmRequired: "Please confirm your password."
+   passwordsMismatch: "The two passwords don't match."
+   reportNameRequired: "Please enter a name for this report."
+   typeRequired: "Please choose Income or Expense."
+   amountRequired: "Please enter an amount."
+   amountInvalid: "The amount must be a number, like 18500."
+   amountNotPositive: "The amount must be greater than 0."
+   amountTooLarge: "That amount is too large."
+   dateRequired: "Please choose a date."
+   dateInvalid: "That date isn't valid. Use the format YYYY-MM-DD."
+   codeRequired: "Please enter the reset code."
+   Keep the existing `common` group unchanged.
+
+2. Create src/utils/validation.ts. Every validator takes strings and returns `string | null`: the error message from strings.errors, or null when the input is fine. Always trim the input first.
+   - normalizeEmail(email): trims and lowercases.
+   - validateName(value): not empty.
+   - validateEmail(value): not empty, then must match /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.
+   - validatePassword(value): not empty, at least 6 characters. Do NOT trim passwords (spaces count).
+   - validateConfirmPassword(password, confirm): confirm not empty, and must equal password exactly.
+   - validateReportName(value): not empty.
+   - validateType(value): must be exactly "income" or "expense".
+   - parseAmount(raw: string): number | null. Remove commas and spaces, then accept only the pattern /^-?\d+(\.\d{1,2})?$/ and return the number; otherwise null.
+   - validateAmount(raw): empty gives amountRequired; text that is not a number (letters, "1e5", "NaN", "12abc") gives amountInvalid; a number <= 0 (including negatives and 0) gives amountNotPositive; a number above 999999999 gives amountTooLarge; otherwise null.
+   - validateDate(raw): empty gives dateRequired; not a real YYYY-MM-DD date (use isValidISODate) gives dateInvalid.
+   - validateResetCode(value): not empty.
+
+   Required results: validateAmount("18,500") = null; validateAmount("18500") = null; validateAmount("0") = amountNotPositive; validateAmount("-50") = amountNotPositive; validateAmount("abc") = amountInvalid; validateAmount("") = amountRequired; validateAmount("1000000000") = amountTooLarge; validateEmail("Budi@Mail.com") = null; validateEmail("budi@") = emailInvalid; validatePassword("12345") = passwordTooShort; parseAmount("18,500") = 18500.
+
+Create or change only src/strings/en.ts and src/utils/validation.ts.)
+**What it changed:** Added the `errors` group to src/strings/en.ts and created src/utils/validation.ts (name, email, password, confirm password, report name, type, amount and date validators).
+**Problems / fixes:** None. The model tested every required example in Node and `tsc` is clean. Decisions: minimum password length 6 (the brief gives none); emails are normalized by the accounts service before saving; amounts that become Infinity are rejected.
