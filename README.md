@@ -1,63 +1,69 @@
 # Personal Finance Tracker
 
-A React Native (Expo) mobile app where a user signs in, records each income or expense by hand, and always sees their current balance. Built for a phone screen, tested in the browser. Currency: FCFA.
+A React Native (Expo) mobile app where a user signs in, records each income or expense by hand, and always sees their current balance. Built for a phone screen and tested in the browser. Currency: FCFA.
 
-## Tech
-- React Native with Expo SDK 58, Expo Router (screens in `src/app`), TypeScript
-- No backend: all data (users, reset codes, reports) is stored locally with AsyncStorage
-- Passwords are never stored as plain text (salted hash with expo-crypto)
-- Fonts: Fraunces (headings), Instrument Sans (text), IBM Plex Mono (amounts)
-
-## What the app does
-A personal money notebook. The user records transactions and the app calculates the balance: total income minus total expenses. The balance is never typed by hand.
-
-### One transaction (report)
-| Field | Rule |
-|---|---|
-| Name | Required text, e.g. "Salary", "Taxi fare" |
-| Type | Required: Income or Expense |
-| Amount | Required number greater than 0 |
-| Date | Required, defaults to today, can be changed |
-| Balance | Calculated, never typed. Updates after every add, edit or delete |
-
-### Screens
-1. **Login / Register**: name, email, password, confirm password. Rejects empty fields, invalid emails, mismatched passwords and duplicate accounts. Clear error for a wrong email or password.
-2. **Forgot Password**: user enters their registered email, a reset code is generated and shown on screen. Unknown email shows a helpful message.
-3. **Recover Password**: user enters the code and a new password twice. Wrong or expired codes are rejected. The old password stops working.
-4. **Previous Reports (dashboard)**: balance, total income and total expenses at the top, then every report newest first. Income and expense are clearly different (sign, arrow and color). Each user sees only their own reports.
-5. **Add Report**: name, type, amount, date, with validation. After saving, returns to the list with the balance updated.
-6. **Edit Report**: opened from the list, pre-filled, same validation. Cancel changes nothing.
+## Features
+- **Register and Login:** name, email, password and confirm password. Empty fields, invalid emails, mismatched passwords and duplicate accounts are rejected, and a wrong email or password shows a clear error.
+- **Passwords are never stored as plain text:** each password is saved as a salted SHA-256 hash.
+- **Forgot Password:** the user enters a registered email and a 6-digit reset code is shown on screen (valid for 10 minutes). An unknown email shows a helpful message.
+- **Recover Password:** the user enters the code and a new password twice. Wrong or expired codes are rejected, a code works only once, and the old password stops working.
+- **Previous Reports (dashboard):** current balance, total income and total expenses at the top, then every report, newest first. Income shows a green ▲ and "+", expenses a red ▼ and "−". Each user sees only their own reports.
+- **Add Report and Edit Report:** name, type (Income or Expense), amount (greater than 0) and date (defaults to today). Cancel changes nothing.
+- **Balance:** calculated as total income minus total expenses. It is never typed and updates after every add or edit.
+- **Data survives a reload:** everything is stored in the browser with AsyncStorage.
 
 ### Bonus features
-Delete a report (with confirmation), search and filter reports, monthly income vs expense summary chart, export to CSV and PDF, logout and "remember me".
+- Logout
+- Remember me (keeps the user logged in after a reload)
 
-## Design direction
-A warm "ledger" look: cream paper background, ink-green text, forest-green buttons, a gold accent. Income is green with a + and an up arrow, expense is red with a minus and a down arrow, so they are never told apart by color alone. All colors, fonts and spacing live in `src/theme`, and all text lives in `src/strings`.
+Not built: delete a report, search or filter, monthly chart, CSV or PDF export.
 
-## Project structure
-```
-src/
-  app/          screens (one file = one screen)
-  components/   small reusable pieces
-  theme/        colors, fonts, spacing
-  storage/      AsyncStorage helpers
-  utils/        validation, money format, balance maths
-  strings/      all app text
-docs/           prompt log and reflection
-```
+## Tech
+- React Native with Expo SDK 58, Expo Router (one file in `src/app` is one screen), TypeScript
+- No backend: users, reset codes, reports and the session are stored locally with AsyncStorage
+- Password hashing with expo-crypto
+- Fonts: Fraunces, Instrument Sans and IBM Plex Mono
 
 ## How to install
+Requires Node.js 22 (the version used to build this app).
+
 ```
+git clone https://github.com/alainnjonyu626-cmd/personal-finance-tracker-Budi-Alain.git
+cd personal-finance-tracker-Budi-Alain
 npm install
 ```
+
+The project includes a `.npmrc` file with `legacy-peer-deps=true`, so a plain `npm install` is enough.
 
 ## How to run
 ```
 npx expo start --web
 ```
 
-## Test login
-(to be added once Register and Login are built)
+Open **http://localhost:8081** in a browser (use `localhost`: password hashing needs a secure browser origin, so opening the app through a network address may not work).
 
-## Note
-This project uses a `.npmrc` file with `legacy-peer-deps=true`. Run `npm install` as usual.
+## Test login
+All data is saved in the browser's local storage, so a new browser has no accounts yet. Register one first, then log in:
+
+- Name: `Test User`
+- Email: `test@example.com`
+- Password: `test1234` (a throwaway password: never use a real one)
+
+To try Forgot Password, use the email of an account you registered.
+
+## Project structure
+```
+src/
+  app/          screens (login, register, forgot-password, reset-password, reports, add-report, edit-report)
+  components/   TextField, PasswordField, Button, Banner, ReportForm
+  context/      AuthContext (who is logged in)
+  storage/      storage helpers, accounts service, reports service
+  theme/        colours, fonts, spacing
+  utils/        validation, money, dates, balance, crypto
+  strings/      all app text
+docs/           prompt log and reflection
+```
+
+## Prompt log and reflection
+- Prompt log: [docs/PROMPT_LOG.md](docs/PROMPT_LOG.md)
+- Reflection: [docs/REFLECTION.md](docs/REFLECTION.md)

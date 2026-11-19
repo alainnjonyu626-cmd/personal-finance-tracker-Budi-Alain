@@ -455,3 +455,12 @@ Fix: inside the useEffect, before calling getReport, add a guard: if `user` or `
 ```
 **What it changed:** Added the `form` strings group to src/strings/en.ts, created the shared ReportForm component (name, Income/Expense selector, amount, date with a Use today button, validation) and replaced the placeholder Add Report and Edit Report screens with real ones.
 **Problems / fixes:** Copilot ran no terminal commands and did not run type checks. My own `npx tsc --noEmit` found two errors in the Edit screen (`user` possibly null and `id` possibly undefined), which I fixed. Tested: bad input, the five example transactions give exactly 102,300 FCFA, edit and cancel, reload keeps the data, and a second account sees an empty list.
+
+
+## README and reflection drafted with Claude chat
+**Date:** 19 Nov 2026
+**Tool / model:** Claude (chat, not a coding tool)
+**Attached files:** none
+**Prompt:** I asked Claude to write the README and a draft reflection that describe only what really works in the app (no example test data in the README) and to include a test login.
+**What it changed:** Replaced README.md and docs/REFLECTION.md. I read both and edited them to match what really happened.
+**Problems / fixes:** None.
