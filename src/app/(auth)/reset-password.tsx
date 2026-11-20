@@ -117,10 +117,10 @@ export default function ResetPasswordScreen() {
               accessibilityRole="link"
               onBlur={() => setNewCodeLinkFocused(false)}
               onFocus={() => setNewCodeLinkFocused(true)}
-              style={[
+              style={StyleSheet.flatten([
                 styles.link,
                 newCodeLinkFocused && styles.linkFocused,
-              ]}
+              ])}
             >
               <Text style={styles.linkText}>{strings.auth.needNewCode}</Text>
             </Pressable>
@@ -130,10 +130,10 @@ export default function ResetPasswordScreen() {
               accessibilityRole="link"
               onBlur={() => setLoginLinkFocused(false)}
               onFocus={() => setLoginLinkFocused(true)}
-              style={[
+              style={StyleSheet.flatten([
                 styles.link,
                 loginLinkFocused && styles.linkFocused,
-              ]}
+              ])}
             >
               <Icon name="back" size={18} color={colors.forest} />
               <Text style={styles.linkText}>{strings.auth.backToLogin}</Text>
