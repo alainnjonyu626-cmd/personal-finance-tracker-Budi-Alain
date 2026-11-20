@@ -103,10 +103,10 @@ export default function ForgotPasswordScreen() {
               accessibilityRole="link"
               onBlur={() => setLoginLinkFocused(false)}
               onFocus={() => setLoginLinkFocused(true)}
-              style={[
+              style={StyleSheet.flatten([
                 styles.link,
                 loginLinkFocused && styles.linkFocused,
-              ]}
+              ])}
             >
               <Icon name="back" size={18} color={colors.forest} />
               <Text style={styles.linkText}>{strings.auth.backToLogin}</Text>
