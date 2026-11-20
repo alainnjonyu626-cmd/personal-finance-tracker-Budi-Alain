@@ -593,5 +593,5 @@ TASK: fix one runtime error and change nothing else. When the Forgot Password sc
 
 Create or change only src/app/(auth)/forgot-password.tsx and src/app/(auth)/reset-password.tsx.
 ```
-**What it changed:** (fill in after the model finishes)
-**Problems / fixes:** (fill in after checks)
+**What it changed:** Fixed the Expo Router Slot style-array error by passing a single flattened style object to the Link children in forgot-password.tsx and reset-password.tsx (6 lines changed in each file).
+**Problems / fixes:** Copilot ran no terminal commands. I confirmed the error was gone by opening the Forgot and Reset screens and watching the terminal: no red errors. tsc cannot catch this kind of runtime error, so it must be checked by running the app.
