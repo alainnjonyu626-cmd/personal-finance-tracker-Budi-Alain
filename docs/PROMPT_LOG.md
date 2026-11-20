@@ -595,3 +595,35 @@ Create or change only src/app/(auth)/forgot-password.tsx and src/app/(auth)/rese
 ```
 **What it changed:** Fixed the Expo Router Slot style-array error by passing a single flattened style object to the Link children in forgot-password.tsx and reset-password.tsx (6 lines changed in each file).
 **Problems / fixes:** Copilot ran no terminal commands. I confirmed the error was gone by opening the Forgot and Reset screens and watching the terminal: no red errors. tsc cannot catch this kind of runtime error, so it must be checked by running the app.
+
+
+## Prompt 8A: Rename the app to Tally and add a drawn tally-mark logo
+**Date:** 20 Nov 2026
+**Tool / model:** GitHub Copilot (Copilot Fusion)
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/theme/index.ts, src/strings/en.ts, src/components/index.ts, src/components/AuthScreen.tsx
+**Before sending:** I created the branch feature/branding so main stays safe.
+**Prompt:**
+```
+Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
+
+TASK: rename the app to "Tally" and add a small logo component drawn with plain shapes (no image files). Change only what is listed.
+
+1. src/strings/en.ts: in the existing `screens` group change appName from "Personal Finance Tracker" to "Tally". In the existing `auth` group add tagline: "Count every franc.". Keep every other key and text exactly as it is.
+
+2. Create src/components/Logo.tsx (named export Logo) and export it from src/components/index.ts. Props: size?: number (default 56); color?: string (default colors.gold). It draws a tally gate with plain View shapes inside a square container of width and height `size`: FOUR vertical bars, each with width size * 0.1, height size * 0.62, radius.pill corners, background `color`, evenly spread across the container with their vertical centres in the middle; and ONE diagonal bar of the same thickness and colour, about size * 0.95 long, centred in the container and rotated about -62 degrees (transform rotate) so it crosses all four vertical bars. Use only the theme for the default colour. The whole logo is decorative: hide it from accessibility (accessibilityElementsHidden and importantForAccessibility="no-hide-descendants"). No images, no SVG packages.
+
+3. src/components/AuthScreen.tsx: in the hero, replace the Icon wallet inside the 56x56 gold circle with <Logo size={32} color={colors.forest} />. Change nothing else in that file.
+
+Create or change only: src/strings/en.ts, src/components/Logo.tsx, src/components/index.ts and src/components/AuthScreen.tsx.
+```
+**What it changed:** Renamed the app to Tally in src/strings/en.ts, added a tagline string, created a Logo component that draws a tally gate (four bars and a diagonal) from plain shapes, and used it in the AuthScreen hero instead of the wallet icon.
+**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the named files; tsc and both searches were clean. I changed app.json and the README title by hand because Copilot may not edit config files. (Add what you saw in the browser.)
+
+
+## Logo, favicon and app name (drafted with Claude chat)
+**Date:** 20 Nov 2026
+**Tool / model:** Claude (chat, not a coding tool)
+**Attached files:** none
+**Prompt:** I asked Claude for simple app names, picked "Tally", and asked for a logo. Then I asked Claude to make the browser tab icon match the app logo before I committed.
+**What it changed:** Created assets/images/tally-icon.svg (the logo as an SVG), converted it to assets/images/favicon.png and assets/images/icon.png, and set the app name to "Tally" in app.json. I made these changes by hand because Copilot may not edit config or asset files.
+**What it changed:** Created assets/images/tally-icon.svg (the logo as an SVG), converted it to PNG with an online converter into assets/images/favicon.png and assets/images/icon.png, and set the app name to "Tally" in app.json. I made these changes by hand because Copilot may not edit config or asset files.

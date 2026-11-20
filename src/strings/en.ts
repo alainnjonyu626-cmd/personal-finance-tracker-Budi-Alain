@@ -52,6 +52,7 @@ export const strings = {
 
   // words used by the login and register forms only
   auth: {
+    tagline: "Count every franc.",
     loginSubtitle: "Welcome back. Your money notebook is waiting.",
     registerSubtitle: "Create your account to start tracking your money.",
     nameLabel: "Full name",
@@ -127,7 +128,7 @@ export const strings = {
 
   // titles and words used on the screens (the real content comes later)
   screens: {
-    appName: "Personal Finance Tracker",
+    appName: "Tally",
     login: "Log in",
     register: "Create account",
     forgotPassword: "Forgot password",

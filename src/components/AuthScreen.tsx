@@ -13,7 +13,7 @@ import {
 import { strings } from "@/strings/en";
 import { colors, layout, radius, spacing, typography } from "@/theme";
 
-import { Icon } from "./Icon";
+import { Logo } from "./Logo";
 
 export interface AuthScreenProps {
   title: string;
@@ -78,9 +78,8 @@ export function AuthScreen({
             importantForAccessibility="no-hide-descendants"
             style={styles.goldCoinOutline}
           />
-
           <View style={styles.walletCircle}>
-            <Icon name="wallet" size={28} color={colors.forest} />
+            <Logo size={32} color={colors.forest} />
           </View>
           <Text style={styles.appName}>{strings.screens.appName}</Text>
           <Text accessibilityRole="header" style={styles.title}>

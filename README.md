@@ -1,6 +1,7 @@
-# Personal Finance Tracker
+# Tally
 
-A React Native (Expo) mobile app where a user signs in, records each income or expense by hand, and always sees their current balance. Built for a phone screen and tested in the browser. Currency: FCFA.
+*Tally: Count every franc.* A personal finance tracker (student project): a React Native (Expo) mobile app where a user signs in, records each income or expense by hand, and always sees their current balance.
+
 
 ## Features
 - **Register and Login:** name, email, password and confirm password. Empty fields, invalid emails, mismatched passwords and duplicate accounts are rejected, and a wrong email or password shows a clear error.
