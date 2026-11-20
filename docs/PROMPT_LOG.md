@@ -405,7 +405,7 @@ TASK: build the real Forgot Password and Recover (Reset) Password screens. Copy 
 Create or change only src/strings/en.ts, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx and src/app/(auth)/login.tsx.
 ```
 **What it changed:** Added forgot and reset strings to src/strings/en.ts, built the real Forgot Password screen (shows a gold reset code card) and Recover Password screen, and added a "Password updated" banner to the Login screen.
-**Problems / fixes:** Copilot asked permission before reading src/storage/auth.ts (Default Permissions mode); I allowed it once. It ran no terminal commands and did not run type checks, so I ran them myself. (Write what you saw in the checks and the browser test.)
+**Problems / fixes:** Copilot asked permission before reading src/storage/auth.ts (Default Permissions mode); I allowed it once. It ran no terminal commands and did not run type checks, so I ran them myself: tsc and the searches were clean and git status listed only the named files. I tested the forgot and reset flow in the browser.
 
 
 ## Prompt 6A: Dashboard (Previous Reports)
@@ -433,9 +433,7 @@ TASK: build the real Dashboard (Previous Reports) screen. Use components from "@
 Create or change only src/strings/en.ts and src/app/(app)/reports.tsx.
 ```
 **What it changed:** Added the `reports` strings group to src/strings/en.ts and replaced the placeholder reports screen with the real dashboard: balance card (balance, total income, total expenses), a newest-first list with ruled rows, ▲ green income and ▼ red expense, an empty state, a fixed Add report button and a Log out button.
-**Problems / fixes:** Copilot ran no terminal commands. The list refreshes on focus. Only the empty state and navigation can be tested until Add Report exists. (Write what you saw.)
-
-
+**Problems / fixes:** Copilot ran no terminal commands. The list refreshes on focus. Until Add Report existed, only the empty state and navigation could be tested; after Add Report was built I tested the dashboard with real reports.
 
 ## Prompt 6B-fix: TypeScript errors in the Edit Report screen
 **Date:** 19 Nov 2026
@@ -508,7 +506,7 @@ TASK: redesign the Dashboard screen (src/app/(app)/reports.tsx) so it looks mode
 Create or change only: src/theme/colors.ts, src/theme/spacing.ts, src/storage/storage.ts, src/strings/en.ts, src/components/Icon.tsx, src/components/index.ts, src/app/(app)/reports.tsx.
 ```
 **What it changed:** Added new colour, radius and storage-key tokens, an Icon component (Ionicons wrapper) and dashboard strings, and redesigned the dashboard: fixed greeting and forest-green hero balance card with a gold coin motif, hide/show balance (remembered after reload), only the reports list scrolls, icon badges on rows and a floating Add button.
-**Problems / fixes:** @expo/vector-icons was not in package.json, so I installed it myself with `npx expo install` before sending the prompt (commit d0a307d). Copilot ran no terminal commands. Checks passed: git status listed only the named files, tsc, the any search and the hex-colour search were clean. (Write what you saw in the browser.)
+**Problems / fixes:** @expo/vector-icons was not in package.json, so I installed it myself with `npx expo install` before sending the prompt (commit d0a307d). Copilot ran no terminal commands. Checks passed: git status listed only the named files, and tsc, the any search and the hex-colour search were clean. I checked the new dashboard in the browser.
 
 
 ## Prompt 7B: Modern Add and Edit report screens
@@ -535,7 +533,7 @@ TASK: redesign the Add Report and Edit Report screens to match the new dashboard
    Remove the old "Use today" button (keep its string key).
    The fixed footer (outside the ScrollView): flexDirection row, gap spacing.md, paddingHorizontal spacing.xl, paddingTop spacing.md, paddingBottom spacing.xl, background colors.paper, 1px colors.line top border. Left: the secondary Cancel Button (flex 1, disabled while saving). Right: the primary submit Button (flex 2, same title, loading and disabled behaviour as now).
 
-4. src/app/(app)/add-report.tsx and src/app/(app)/edit-report/[id].tsx: keep all logic (user guard, getReport and updateReport or addReport calls, key={report.id}, replace navigation to "/reports"). New page structure: the root is a View with flex 1 and colors.paper (NO outer ScrollView: ReportForm scrolls). A fixed header row (paddingHorizontal spacing.xl, paddingTop spacing.xl, flexDirection row, alignItems center, gap spacing.md): a 48x48 circular back button (radius.pill, background colors.paperDeep, 1px colors.line border) with Icon back (size 22, colors.forest), accessibilityRole="button", accessibilityLabel strings.form.backToReports, onPress router.replace("/reports"), with the gold keyboard focus ring; next to it a column with the title (strings.screens.addReport or editReport, typography.displayL, colors.ink) and under it strings.form.addSubtitle or strings.form.editSubtitle (typography.caption, colors.inkSoft). Below the header a View with flex 1 holding <ReportForm>. On the Edit screen: while loading show a centred ActivityIndicator (colors.forest); when the report is not found show a centred block with Icon alert (size 32, colors.expense), strings.form.notFoundTitle (typography.title, colors.ink), strings.form.notFoundHint (typography.body, colors.inkSoft) and the primary Button strings.form.backToReports as before.
+   4. src/app/(app)/add-report.tsx and src/app/(app)/edit-report/[id].tsx: keep all logic (user guard, getReport and updateReport or addReport calls, key={report.id}, replace navigation to "/reports"). New page structure: the root is a View with flex 1 and colors.paper (NO outer ScrollView: ReportForm scrolls). A fixed header row (paddingHorizontal spacing.xl, paddingTop spacing.xl, flexDirection row, alignItems center, gap spacing.md): a 48x48 circular back button (radius.pill, background colors.paperDeep, 1px colors.line border) with Icon back (size 22, colors.forest), accessibilityRole="button", accessibilityLabel strings.form.backToReports, onPress router.replace("/reports"), with the gold keyboard focus ring; next to it a column with the title (strings.screens.addReport or editReport, typography.displayL, colors.ink) and under it strings.form.addSubtitle or strings.form.editSubtitle (typography.caption, colors.inkSoft). Below the header a View with flex 1 holding <ReportForm>. On the Edit screen: while loading show a centred ActivityIndicator (colors.forest); when the report is not found show a centred block with Icon alert (size 32, colors.expense), strings.form.notFoundTitle (typography.title, colors.ink), strings.form.notFoundHint (typography.body, colors.inkSoft) and the primary Button strings.form.backToReports as before.
 
 All colours, fonts and sizes come from the theme (the exact pixel sizes above are allowed). No hard-coded hex values. Every tappable element is at least 48 high.
 
@@ -543,7 +541,7 @@ Create or change only: src/strings/en.ts, src/components/TextField.tsx, src/comp
 
 **What it changed:** Redesigned the Add and Edit report screens: back button and subtitle, Income/Expense cards with icons, a large amount field with FCFA, Today and Yesterday date chips, and Save and Cancel pinned at the bottom. TextField gained two optional props (leftElement and size).
 
-**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the five named files; tsc and both searches were clean. I rechecked Login, Register and Forgot password to make sure the shared TextField still looked the same. (Write what you saw.)
+**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the five named files; tsc and both searches were clean. I rechecked Login, Register and Forgot password to make sure the shared TextField still looked the same.
 
 
 ## Prompt 7C: Modern Login and Register screens (AuthScreen, autofill fix)
@@ -578,24 +576,22 @@ Create or change only: src/components/AuthScreen.tsx, src/components/index.ts, s
 **Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the six named files; tsc and both searches were clean. I tested the autofill colour after saving a login, and all validation, the registered banner and Remember me still work. (Write anything that went wrong.)
 
 
-## Prompt 7D: Modern Forgot Password and Reset Password screens
+
+## Prompt 7D-fix: Slot style-array error on Forgot and Reset screens
 **Date:** 19 Nov 2026
 **Tool / model:** GitHub Copilot (Copilot Fusion)
-**Attached files:** docs/PROMPT_HEADER.md, README.md, src/theme/colors.ts, src/theme/spacing.ts, src/theme/typography.ts, src/theme/index.ts, src/strings/en.ts, src/components/index.ts, src/components/AuthScreen.tsx, src/components/TextField.tsx, src/components/PasswordField.tsx, src/components/Button.tsx, src/components/Banner.tsx, src/components/Icon.tsx, src/storage/auth.ts, src/app/(auth)/login.tsx, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx
+**Attached files:** docs/PROMPT_HEADER.md, README.md, src/app/(auth)/forgot-password.tsx, src/app/(auth)/reset-password.tsx, src/app/(auth)/login.tsx
 **Prompt:**
 ```
 Follow the rules in the attached docs/PROMPT_HEADER.md, especially: run NO terminal commands at all.
 
-TASK: redesign the Forgot Password and Reset Password screens in the same "Modern Ledger" style as the already redesigned Login screen (src/app/(auth)/login.tsx, attached as the pattern to copy: it uses AuthScreen from "@/components"). Change ONLY layout and styling. Keep every validation rule, error message, service call (requestPasswordReset, resetPassword), route param (email, reset), the rule that the code is never put in route params, and all navigation exactly as they are now. Add no features and no new strings.
+TASK: fix one runtime error and change nothing else. When the Forgot Password screen opens in the browser, Expo Router throws: "[expo-router]: You are passing an array of styles to a child of <Slot>. Consider flattening the styles with StyleSheet.flatten before passing them to the child component." This happens when a Link with the `asChild` prop wraps a single child (Pressable, Text or View) whose `style` prop is an ARRAY.
 
-1. src/app/(auth)/forgot-password.tsx: remove the old page wrapper, ScrollView and header, and render the same form inside <AuthScreen title={strings.screens.forgotPassword} subtitle={strings.auth.forgotSubtitle} footer={...}>. Inside, keep in this order: the email TextField with leftElement Icon mail (size 20, colors.inkSoft), the error Banner, the primary send-code Button, and then (when a code exists) the code card and the Continue Button, all with their current props and behaviour (editing the email still clears its error, the Banner and the code card). The footer holds, centred, the "back to log in" Link with the same Link style as the login footer (typography.bodyStrong, colors.forest, minHeight layout.minTouchTarget), with Icon back (size 18, colors.forest) before the text.
-   The code card (replace its current look): a View with background colors.forest, radius.xl, padding spacing.xl, overflow hidden and the same two decorative gold circles used in the AuthScreen hero (smaller: a 120x120 filled circle colors.gold opacity 0.18 at top -30 right -30, and a 72x72 ring with a 2px colors.gold border, opacity 0.35, at top -8 right -8; both pointerEvents="none" and hidden from accessibility). Content: a row with a 36x36 circle (radius.pill, background colors.gold) holding Icon key (size 18, colors.forest) and the label strings.auth.yourCode (typography.label, colors.forestSoft) beside it; then (marginTop spacing.lg) a row of six digit boxes with gap spacing.sm, one per character of the code, each box flex 1, maxWidth 52, aspectRatio 0.8, radius.md, background colors.paper, centred text in typography.amountL and colors.ink with includeFontPadding false; the whole row has accessibilityLabel `${strings.auth.yourCode}: ${the digits separated by spaces}` and the individual digits are hidden from accessibility (accessibilityElementsHidden and importantForAccessibility="no-hide-descendants"); then (marginTop spacing.lg) the line `${strings.auth.validForPrefix} ${RESET_CODE_MINUTES} ${strings.auth.minutesWord}` in typography.caption and colors.forestSoft; then (marginTop spacing.xs) strings.auth.codeNote in typography.caption and colors.forestSoft. The code card fades in (opacity 0 to 1 over 300 ms using Animated.timing with useNativeDriver set to Platform.OS !== "web") each time a new code is shown; if AccessibilityInfo.isReduceMotionEnabled() resolves true, skip the animation.
+1. In src/app/(auth)/forgot-password.tsx find every <Link ... asChild> whose child has an array `style`. Fix each one by passing a single style object: wrap the array in StyleSheet.flatten([...]) or move the styles into one StyleSheet.create entry. Do the same check in src/app/(auth)/reset-password.tsx and fix it there if found.
+2. If the error does not come from a Link with asChild (for example it comes from a component imported from "@/components" that uses Slot), STOP and tell me the file and line instead of guessing.
+3. Do not change any behaviour, text, colours, layout or navigation. src/app/(auth)/login.tsx is attached only as an example of a Link that already works; do not edit it.
 
-2. src/app/(auth)/reset-password.tsx: the same treatment with title strings.screens.resetPassword and subtitle strings.auth.resetSubtitle. Keep in this order with their current props and behaviour: the email TextField (leftElement Icon mail), the reset code TextField (leftElement Icon key, number-pad), the new PasswordField with its helper (leftElement Icon lock), the confirm PasswordField (leftElement Icon lock), the error Banner and the primary Button. The footer holds, centred, the "need a new code" Link and the "back to log in" Link (login footer link style, with Icon back before the "back to log in" text), stacked with a gap of spacing.sm.
-
-All colours, fonts and sizes come from the theme (the exact pixel sizes above are allowed). No hard-coded hex values. Every tappable element is at least 48 high.
-
-Create or change only: src/app/(auth)/forgot-password.tsx and src/app/(auth)/reset-password.tsx.
+Create or change only src/app/(auth)/forgot-password.tsx and src/app/(auth)/reset-password.tsx.
 ```
-***What it changed:** Moved Forgot Password and Reset Password into the shared AuthScreen shell with icons in every field. The reset code now shows on a forest-green card as six separate digit boxes with a gold coin motif, and the card fades in each time a new code is shown.
-**Problems / fixes:** Copilot ran no terminal commands. Checks passed: git status listed only the two named screens, tsc and both searches were clean. I retested the full flow: unknown email message, code card, wrong code rejected, new password works, old password fails, and a code cannot be used twice. (Write anything that went wrong.)
+**What it changed:** (fill in after the model finishes)
+**Problems / fixes:** (fill in after checks)
